@@ -1,4 +1,4 @@
-import pygame, random, sys, math
+import pygame, random, sys, math, os
 from pygame.locals import *
  
 pygame.init()
@@ -26,7 +26,20 @@ font = pygame.font.Font("IBMPlexSans-Regular.ttf", 20)
 # Main Menu
 # Different Levels
 
+def load_images(path_to_directory):
+    """Loads all images"""
+    images = {}
+    for dirpath, dirnames, filenames in os.walk(path_to_directory):
+        for name in filenames:
+            if name.endswith('.png'):
+                key = name[:-4]
+                img = pygame.image.load(os.path.join(dirpath, name)).convert_alpha()
+   
+                images[key] = img
+    return images
+
 def shorten(Num):
+    """Shortens a number"""
     count = 0
     let = ""
 
@@ -92,6 +105,8 @@ class Tower():
         self.camo = False
         self.effects = []
         self.dead = False
+        self.fireDamage = 1
+        self.fireLength = 50
 
         self.description = [[["",0]]*4]*2
         #Putting in all the distinct upgrades
@@ -100,13 +115,19 @@ class Tower():
             self.descriptions =[[["Long Range Shot",100],["Extra Range Shot",200],["Double Damage",600],["Big Shot",2000]],
                                 [["Piercing Darts", 150],["Faster Monkeys", 300],["Triple Shot", 450],["Speed 4 Days", 3500]]]
 
-            self.pierce, self.damage, self.speed, self.range, self.size, self.shotAmount, self.seeking, self.bulletSpeed, self.camo, self.value = 1,1,1,100,10,1, False, 10, False, 100
+            self.pierce, self.damage, self.speed, self.range, self.size, self.shotAmount, self.seeking, self.bulletSpeed, self.camo, self.value, self.fire = 1,1,1,100,10,1, False, 10, False, 100, False
         elif rank == 2:
             #Ninja Monkeys
             self.descriptions =[[["Ninja Discipline",150],["Sharp Shruks",275],["Double Trouble",750],["Grandjitsu",2750]],
                                 [["Seeking Shruks", 150],["Small, but Deadly", 300],["Slow, but Poweful", 450],["Bullet Time", 4500]]]
 
-            self.pierce, self.damage, self.speed, self.range, self.size, self.shotAmount, self.seeking, self.bulletSpeed, self.camo, self.value = 1,1,1,100,10,1, False, 10, True, 200
+            self.pierce, self.damage, self.speed, self.range, self.size, self.shotAmount, self.seeking, self.bulletSpeed, self.camo, self.value, self.fire  = 1,1,1,100,10,1, False, 10, True, 200, False
+        elif rank == 3:
+            #Flamethrower
+            self.descriptions =[[["Faster Flames",125],["Ranged Flames",250],["Damaging Fire",600],["Tracking Fire", 6500]],
+                                [["Long Lasting Fire", 175],["Extra Fire", 200],["Fire for all", 800],["Forest Fire", 3000]]]
+            
+            self.pierce, self.damage, self.speed, self.range, self.size, self.shotAmount, self.seeking, self.bulletSpeed, self.camo, self.value, self.fire  = 1,0,0.25,50,15,1, False, 10, True, 300, True
             
 
     def draw(self):
@@ -123,12 +144,17 @@ class Tower():
         for affect in self.effects:
             if affect[0] == "Bullet Time":
                 effect[0] *= 3
-                affect[1] -= 1
-                if affect[1] <= 0:
-                    self.effects.pop(self.effects.index(affect))
-        
+            elif affect[0] == "Forest Fire" and not affect[2]:
+                for i in range(36):
+                    self.Projectiles.append(Projectile(self.x+int(self.width/2), self.y+int(self.height/2), i*0.2, self.pierce, self.size, self.bulletSpeed,random.randint(0,1000000)))
+                affect[2] = True
+            
+            affect[1] -= 1
+            if affect[1] <= 0:
+                self.effects.pop(self.effects.index(affect))
+                    
         #Checking to see if there is a monster in range
-        if self.rank in [1,2]  and self.cooldown <= 0:
+        if self.rank in [1,2, 3]  and self.cooldown <= 0:
             for monster in Monsters:
                 if math.sqrt((monster[0].x - self.x)**2 + (monster[0].y - self.y)**2) <= self.range and self.cooldown <= 0:
                     if not monster[0].camo or (monster[0].camo and self.camo):
@@ -151,12 +177,15 @@ class Tower():
             projectile.update(speed)
             stop = False
             for monster in Monsters:
-                if pygame.sprite.collide_rect(projectile, monster[0]) == True and not stop and projectile.id not in monster[0].hit:
+                if pygame.sprite.collide_rect(projectile, monster[0]) == True and not stop and projectile.id not in monster[0].hit and ((self.fire and not monster[0].fire[0]) or (not self.fire and monster[0].fire[0])):
                     self.cash += 1
-                    if monster[0].rank == 6:
+                    if monster[0].rank == 6 and self.damage != 0:
                         monster[0].duplicate = True
-                    monster[0].ReRank(monster[0].rank-self.damage)
+                    if self.damage != 0:
+                        monster[0].ReRank(monster[0].rank-self.damage)
                     monster[0].hit.append(projectile.id)
+                    if self.fire:
+                        monster[0].fire = [True, self.fireLength, self.fireLength, self.fireLength * 10, self.fireDamage]
                     stop = True
                     self.pops += 1
                     self.score += 1
@@ -250,7 +279,7 @@ class Tower():
                                             self.speed *= 2
 
 
-                                if self.rank == 2:
+                                elif self.rank == 2:
                                     #Ninja Monkey Upgrades
                                     if i == 0:
                                         if self.currentUpgrade[i] == 0:
@@ -276,6 +305,31 @@ class Tower():
                                             self.path = 2
                                         else:
                                             self.ability.append(["Bullet Time",0,1000,200])
+                                            
+                                elif self.rank == 3:
+                                    #Flamethrower Upgrades
+                                    if i == 0:
+                                        if self.currentUpgrade[i] == 0:
+                                            self.speed *= 1.25
+                                        elif self.currentUpgrade[i] == 1:
+                                            self.range *= 2
+                                        elif self.currentUpgrade[i] == 2:
+                                            self.fireDamage += 1
+                                            self.path = 1
+                                        else:
+                                            self.seeking = True
+                                        
+                                    else:
+                                        if self.currentUpgrade[i] == 0:
+                                            self.fireLength = int(self.fireLength * 1.5)
+                                        elif self.currentUpgrade[i] == 1:
+                                            self.pierce += 2
+                                        elif self.currentUpgrade[i] == 2:
+                                            self.pierce += 5
+                                            self.path = 2
+                                        else:
+                                            self.ability.append(["Forest Fire",0,1000,200])
+                                    
                                 
                                 self.currentUpgrade[i] += 1
                                 self.upgrades[i][self.currentUpgrade[i]-1] = 1
@@ -343,6 +397,7 @@ class Monster():
         self.color = Colors[self.rank-1]
         self.camo = camo
         self.hit = []
+        self.fire = [False,0,0,0,0]
         #All checkpoints on the map
         self.checkpoints = [(6, 5), (6, 2), (3, 2), (3, 9), (13, 9), (13, 4), (17, 4)]
         self.duplicate = False
@@ -391,6 +446,13 @@ class Monster():
                 pygame.draw.rect(gameDisplay, (int(self.color[0]+50),int(self.color[1]+50),int(self.color[2]+50)), (self.x + int(self.width/3)*2 + int(self.width/5), self.y + int(self.height/5)+int(self.width/3)*2, int(self.width/3), int(self.height/3)), 0)
                 pygame.draw.rect(gameDisplay, (int(self.color[0]+50),int(self.color[1]+50),int(self.color[2]+50)), (self.x + int(self.width/5), self.y + int(self.height/5)+int(self.width/3)*2, int(self.width/3), int(self.height/3)), 0) 
 
+
+
+        if self.fire[0]:
+            colors = [(255,0,0), (255,165,0), (255,255,0)]
+            for i in range(9):
+                pygame.draw.rect(gameDisplay, colors[random.randint(0,2)], (self.x+random.randint(5, 20), self.y+random.randint(5, 20), random.randint(5, 20), random.randint(5, 20)), 0)
+
         pygame.draw.rect(gameDisplay, (100, 100, 100), (self.x + int(self.width/5), self.y + int(self.height/5), self.width, self.height), 2)
 
     def movement(self, Lives, speed):
@@ -413,7 +475,16 @@ class Monster():
                 self.y -= self.speed*speed
             elif self.y < self.checkpoints[self.step][1]*40:
                 self.y += self.speed*speed
-                
+
+        if self.fire[0] == True:
+            self.fire[1] -= 1
+            self.fire[2] -= 1
+            if self.fire[1] <= 0:
+                self.fire[1] = self.fire[2] + 0
+                self.ReRank(self.rank - self.fire[4])
+
+            if self.fire[2] <= 0:
+                self.fire[0] = False
 
         return Lives
 
@@ -475,11 +546,12 @@ class Selection():
         keys = pygame.key.get_pressed()
 
         #Drawing the selection of towers
-        for j in range(1):
+        for j in range(2):
             for i in range(2):
-                if 660+i*100 <= pos[0] <= 660+i*100+60 and 150+j*70 <= pos[1] <= 150+j*70+60 and pressed[0] == 1:
-                    self.selected = i+j*2+1
-                    self.cooldown = 20
+                if (j == 1 and i != 1) or j != 1:
+                    if 660+i*100 <= pos[0] <= 660+i*100+60 and 150+j*70 <= pos[1] <= 150+j*70+60 and pressed[0] == 1:
+                        self.selected = i+j*2+1
+                        self.cooldown = 20
 
         #Displays costs of certain towers
         if self.selected != 0:
@@ -714,6 +786,8 @@ def game_loop():
     score = 0
     startButton = Start()
     autoPlay = AutoPlay()
+    Images = load_images("Images")
+    abilityCooldown = False
 
     #Generating each of the waves
     wave = 1
@@ -755,6 +829,7 @@ def game_loop():
                         tempMonster[0].step = monster[0].step
                         tempMonster[0].cooldown = 5
                         tempMonster[0].hit = monster[0].hit
+                        tempMonster[0].fire = monster[0].fire
                         Monsters.append(tempMonster)
         if len(Monsters) == 0:
             Cash += 100+wave+1
@@ -772,11 +847,12 @@ def game_loop():
         #Making the selection bar
         pygame.draw.rect(gameDisplay, (130, 90, 50), (640, 0, 200, 580), 0)
         ColorBoard = [[(200, 0, 0), (0, 0, 200)], [(200, 200, 0), (0, 200, 200)], [(200, 0, 200), (100, 100, 100)], [(200, 200, 200), (100, 150, 200)]]
-        for j in range(1):
+        for j in range(2):
             for i in range(2):
-                pygame.draw.rect(gameDisplay, (140, 90, 40), (660+i*100, 150+j*70, 60, 60), 0)
-                pygame.draw.rect(gameDisplay, (210, 180, 140), (660+i*100, 150+j*70, 60, 60), 3)
-                pygame.draw.rect(gameDisplay, ColorBoard[j][i], (660+i*100+10, 150+j*70+10, 40, 40), 0)
+                if (j == 1 and i != 1) or j != 1:
+                    pygame.draw.rect(gameDisplay, (140, 90, 40), (660+i*100, 150+j*70, 60, 60), 0)
+                    pygame.draw.rect(gameDisplay, (210, 180, 140), (660+i*100, 150+j*70, 60, 60), 3)
+                    pygame.draw.rect(gameDisplay, ColorBoard[j][i], (660+i*100+10, 150+j*70+10, 40, 40), 0)
 
         #Drawing Lives/Cash
         pygame.draw.rect(gameDisplay, (0, 200, 0), (660, 20, 20, 20), 0)
@@ -881,6 +957,11 @@ def game_loop():
                     pygame.draw.line(gameDisplay, (0, 0, 0), (25+55*count, 458), (25+55*count, 450), 2)
                     pygame.draw.line(gameDisplay, (0, 0, 0), (25+55*count, 458), (20+55*count, 455), 2)
 
+                if k == "Forest Fire":
+                    gameDisplay.blit(pygame.transform.scale(Images["ForestFire"],(20,30)),(20+55*count,435))
+                    
+                    gameDisplay.blit(font.render(str(v), True, (0, 0, 0)), (40+55*count, 450))
+
                 stop = False
                 if 10+55*count <= pos[0] <= 10+55*count+40 and 430 <= pos[1] <= 470 and pressed[0] == 1:
                     for j, row in enumerate(Board):
@@ -889,11 +970,19 @@ def game_loop():
                                 tile = int(tile)
                             except Exception:
                                 for ability in tile.ability:
-                                    if not stop and ability[0] == k:
+                                    stop2 = False
+                                    for a in tile.effects:
+                                        if a[0] == ability[0]:
+                                            stop2 = True
+                                    if not stop and ability[0] == k and not stop2 and not abilityCooldown:
+                                        abilityCooldown = True
                                         stop = True
                                         ability[1] = ability[2] + 0
-                                        tile.effects.append([k,ability[3]])
+                                        tile.effects.append([k,ability[3],False])
                 count += 1
+
+        if pressed[0] == 0:
+            abilityCooldown = False
                     
         #Drawing range of selected tower
         for j, row in enumerate(Board):
