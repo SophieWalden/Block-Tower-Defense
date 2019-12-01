@@ -113,7 +113,7 @@ class Tower():
         if rank == 1:
             #Dart Monkeys
             self.descriptions =[[["Long Range Shot",100],["Extra Range Shot",200],["Double Damage",600],["Big Shot",2000]],
-                                [["Piercing Darts", 150],["Faster Monkeys", 300],["Triple Shot", 450],["Speed 4 Days", 3500]]]
+                                [["Piercing Darts", 150],["Faster Tower", 300],["Triple Shot", 450],["Speed 4 Days", 3500]]]
 
             self.pierce, self.damage, self.speed, self.range, self.size, self.shotAmount, self.seeking, self.bulletSpeed, self.camo, self.value, self.fire = 1,1,1,100,10,1, False, 10, False, 100, False
         elif rank == 2:
@@ -177,7 +177,7 @@ class Tower():
             projectile.update(speed)
             stop = False
             for monster in Monsters:
-                if pygame.sprite.collide_rect(projectile, monster[0]) == True and not stop and projectile.id not in monster[0].hit and ((self.fire and not monster[0].fire[0]) or (not self.fire and monster[0].fire[0])):
+                if pygame.sprite.collide_rect(projectile, monster[0]) == True and not stop and projectile.id not in monster[0].hit and ((self.fire and not monster[0].fire[0]) or not self.fire):
                     self.cash += 1
                     if monster[0].rank == 6 and self.damage != 0:
                         monster[0].duplicate = True
