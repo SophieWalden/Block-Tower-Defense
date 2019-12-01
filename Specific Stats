@@ -44,6 +44,7 @@ Yellow (Flamethrower):
 Cost: 300
 Camo Detection: No
 Lead Popability: Yes
+Notes: Base Tower burns Monsters
 
 Upgrades:
 1st Path:
@@ -56,7 +57,26 @@ Tracking Fire: Cost: 6500, Fire projectiles now seeks out it's next opponent
 Long Lasting Fire: Cost: 175, Flames last 50% longer
 Extra Fire: Cost 200, Flamethrower has an extra 2 pierce
 Fire for all: Cost: 800, Flamethrower has an extra 5 pierce
-Forest Fire: Cost 3000, Ability: Shoots 36 projectiles in a ring which set bloons on fire
+Forest Fire: Cost 3000, Ability: Shoots 36 projectiles in a ring which set Monsters on fire
+
+Light Teal (Ice Tower):
+Cost: 400
+Camo Detection: No
+Lead Popability: Yes, if upgraded
+Notes: Base Tower slows Monsters down to 75% speed
+
+1st Path:
+Fast Freezing: Cost: 100, Shoots 50% faster
+Ranged Ice: Cost: 100, Has 50% more range
+Lead Destruction: Cost: 600, Does +1 Damage and can pop lead Monsters
+Frozen in Time: Cost: 6500, Shoots twice as fast for ultimate Poppage and Slowage
+
+2nd Path:
+Slow Monsters: Cost: 175, Makes the monster slow
+Damaging Ice: Cost: 200, Now whenever Ice Tower slows Monsters, they also take 1 Damage (Stacks with 3rd upgrade on the left path)
+Slowed For Life: Cost: 800, Now slows the enemy down to 50% speed and whenever they are unslowed they stay 75% speed forever
+The Arctic: Cost: 3000, Ability: Slows all monsters down to 40% speed for a brief time
+
 
 Monsters:
 
@@ -89,3 +109,8 @@ Black:
 Health: 1
 Speed: 4
 Special Effects: Pops into 2 Pink Monsters
+
+Lead:
+Health: 1
+Speed: 3
+Special Effects: Can only be popped by Flamethrowere and an Ice tower with 3 upgrades to the left
