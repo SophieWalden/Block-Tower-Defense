@@ -40,7 +40,23 @@ Small, but deadly: Cost: 300, Shruikens do 2 damage, but are half size
 Slow, but powerful: Cost 450, Shruikens  do 4 damage, but are fired at half speed
 Bullet Time: Cost 4500, Ability: Ninja shoots at 3 times speed for a few seconds
 
+Yellow (Flamethrower):
+Cost: 300
+Camo Detection: No
+Lead Popability: Yes
 
+Upgrades:
+1st Path:
+Faster Flames: Cost: 100, Shoots flames 25% faster
+Ranged Flames: Cost: 250, Flamethrowers range is doubled
+Damaging Fire: Cost: 600, Fire pops 2 layers instead of 1
+Tracking Fire: Cost: 6500, Fire projectiles now seeks out it's next opponent
+
+2nd Path: 
+Long Lasting Fire: Cost: 175, Flames last 50% longer
+Extra Fire: Cost 200, Flamethrower has an extra 2 pierce
+Fire for all: Cost: 800, Flamethrower has an extra 5 pierce
+Forest Fire: Cost 3000, Ability: Shoots 36 projectiles in a ring which set bloons on fire
 
 Monsters:
 
