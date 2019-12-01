@@ -1,0 +1,75 @@
+If anyone was wondering what the specific stats of towers or monsters are then you came to the right place
+
+Towers:
+
+Red (Base Tower):
+Cost: 100
+Camo Detection: No
+Lead Popability: No
+
+Upgrades:
+1st Path:
+Long Range Shots: Cost: 100, Gives Red 25% more range
+Extra Range Shots: Cost: 200, Gives Red 25% more range
+Double Damage: Cost: 600, makes Red shots pop 2 layers
+Big Shot: Cost: 2000, Double size of Red's projectiles
+
+2nd Path:
+Piercing Darts: Cost: 150, Adds 1 pierce to Red's projectiles
+Faster Tower: Cost: 300, Red shoots 50% faster
+Triple Shot: Cost 450, Red now shoots 3 projectiles
+Speed 4 Days: Cost: 3500, Red shoots 2 times faster
+
+
+
+Blue (Ninja Tower):
+Cost: 200
+Camo Detection: Yes
+Lead Popability: No
+
+Upgrades:
+1st Path:
+Ninja Discipline: Cost: 150, Extra 10% Range with Extra 25% Throwing Speed
+Sharp Shruks: Cost 275, Extra 3 Pierce
+Double Trouble: Cost 750, Ninja shoots 2 shots at once
+Grandjitsu: Cost: 2750, Ninja shoots 5 shots at once
+
+2nd Path:
+Seeking Shruks: Cost: 150, Shruikens now seek out the next enemy
+Small, but deadly: Cost: 300, Shruikens do 2 damage, but are half size
+Slow, but powerful: Cost 450, Shruikens  do 4 damage, but are fired at half speed
+Bullet Time: Cost 4500, Ability: Ninja shoots at 3 times speed for a few seconds
+
+
+
+Monsters:
+
+Red: 
+Health: 1
+Speed: 2
+Special Effects: None
+
+Blue: 
+Health: 1
+Speed: 3
+Special Effects: None
+
+Green: 
+Health: 1
+Speed: 4
+Special Effcts: None
+
+Yellow: 
+Health: 1
+Speed: 5
+Special Effects: None
+
+Pink: 
+Health: 1
+Speed: 6
+Special Effects: None
+
+Black: 
+Health: 1
+Speed: 4
+Special Effects: Pops into 2 Pink Monsters
