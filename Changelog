@@ -1,6 +1,6 @@
 V 0.1a1:
 Base game was released, including:
-6 Bloons released
+6 Monsters released
 2 Towers added
 Preprogrammed waves added
 
@@ -14,3 +14,12 @@ Fixed infite-casting abilities
 V 0.2a2:
 Bug Fixes:
 Fixed bug which made Ninja and Base tower not allowed to hit monsters
+
+V 0.3a1:
+Frozen Metal Update:
+Flamethrower speed doubled
+Flamethrower range upgrade cost 250 -> 100
+Flamethrower speed upgrade cost 100 -> 250
+Swapped Flamethrower left 1st and 2nd upgrades due to range being very important on Flamethrower
+Fixed fire bugs concerning black monsters popping into two
+Added Ice Tower and Lead Monster
