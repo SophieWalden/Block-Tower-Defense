@@ -23,3 +23,9 @@ Flamethrower speed upgrade cost 100 -> 250
 Swapped Flamethrower left 1st and 2nd upgrades due to range being very important on Flamethrower
 Fixed fire bugs concerning black monsters popping into two
 Added Ice Tower and Lead Monster
+
+V 0.4a1:
+Exploding Money Update:
+Added Money tower
+Added Explosiong Factor
+Fixed bugs with infinite abilities
