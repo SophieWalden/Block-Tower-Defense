@@ -78,6 +78,43 @@ Slowed For Life: Cost: 800, Now slows the enemy down to 50% speed and whenever t
 The Arctic: Cost: 3000, Ability: Slows all monsters down to 40% speed for a brief time
 
 
+Grey (Explosion Factory):
+Cost: 500
+Camo Detection: Yes
+Lead Popability: Yes
+Notes: Randomly puts down AOE explosions in it's radius. Hit's every type of monster
+
+Path 1: 
+Fast Production: Cost: 300, Increases speed by 25%
+Faster Production: Cost: 550, Increases speed by 35%
+Damage 4 Days: Cost: 1000, Does +1 Damage to every monster it hits
+Ballistic: Cost: 10000, Increase speed by 100%, +1 Damage
+
+Path 2: 
+Big Bombs: Cost: 175, Bombs hit monsters 25% further away
+Extra Range: Cost: 200, 25% larger range
+Slow Explode: Cost: 800, 50% slower explode time which lets bombs stack up
+Smoke Bomb: Cost: 4500, Ability: Confuses all monsters and makes them go backwards for a certain period of time
+
+
+Green (Money Tower):
+Cost: 600
+Camo Detection: No
+Lead Popability: No
+Notes: Doesn't shoot, but produces crates to pickup which give you money
+
+Path 1: 
+Big Stacks: Cost: 545, 50% More crates
+Bigger Stacks: Cost: 900, 50% More crates
+Money Plantation: Cost: 2500, You guessed it, 50% more crates (This adds up to be a lot of crates)
+Enterprise: Cost: 23500, Crates take 5 times longer to spawn, but are worth 10 times more
+
+Path 2: 
+Long-lasting: Cost: 175, Crates last twice as long
+Valued Output: Cost: 800, Crates are worth twice their value
+AutoCollect: Cost: 1500, Crates are automatically picked up and transported into your cash supply
+Fast Money: Cost: 4500, Ability: Instantly gives you 1000 cash
+
 Monsters:
 
 Red: 
