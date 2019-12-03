@@ -17,6 +17,8 @@ font = pygame.font.Font("IBMPlexSans-Regular.ttf", 20)
 # Ninja Tower (Detects Camo) (Finished)
 # Flamethrower (Pops Lead) (Finished)
 # Ice Tower (Slows/Pops Lead) (Finished)
+# Explosion Factory (Pops Lead/Aoe Damage) (Finished)
+# Money Tower (Generates Money) (Working On)
 #
 # Bloons:
 # Lead Bloons (Finished)
@@ -26,14 +28,10 @@ font = pygame.font.Font("IBMPlexSans-Regular.ttf", 20)
 # Late Game Content:
 # Main Menu
 # Different Maps
-
-#Changes:
-#Flamethrower speed doubled
-#Flamethrower range upgrade cost 250 -> 100
-#Flamethrower speed upgrade cost 100 -> 250
-#Swapped Flamethrower left 1st and 2nd upgrades
-#Fixed fire bugs concerning black monsters popping into two
-#Added Ice Tower
+#
+# Changes:
+# Added Explosion Factory
+# 
 
 def load_images(path_to_directory):
     """Loads all images"""
@@ -90,7 +88,7 @@ class Tower():
         self.x, self.y = x, y
         self.width, self.height = 30, 30
         self.rank = rank
-        Colors = [(200, 0, 0), (0, 0, 200), (200, 200, 0), (0, 200, 200), (200, 0, 200), (100, 100, 100), (200, 200, 200), (100, 150, 200)]
+        Colors = [(200, 0, 0), (0, 0, 200), (200, 200, 0), (0, 200, 200), (100, 100, 100), (0, 200, 0), (200, 200, 200), (100, 150, 200)]
         self.color = Colors[self.rank-1]
         self.range = 100
         self.Projectiles = []
@@ -119,6 +117,13 @@ class Tower():
         self.fireLasting = 150
         self.Permaslow = False
         self.slowAmount = 0.75
+        self.Bombs = []
+        self.ExplodeTime = 100
+        self.bombRange = 50
+        self.Crates = []
+        self.crateValue = 25
+        self.autoCollect = False
+        self.expireTime = 300
 
         self.description = [[["",0]]*4]*2
         #Putting in all the distinct upgrades
@@ -153,11 +158,29 @@ class Tower():
             self.seeking, self.bulletSpeed, self.camo, self.value, self.fire = False, 10, False, 400, False
             self.lead = False
 
+        elif rank == 5:
+            #Explosion Factory Tower
+            self.descriptions =[[["Fast Production",300],["Faster Production",550],["Damage 4 Days",1000],["Ballistic", 10000]],
+                                [["Big Bombs", 175],["Extra Range", 200],["Slow Explode", 800],["Smoke Bomb", 4500]]]
+            
+            self.pierce, self.damage, self.speed, self.range, self.size, self.shotAmount  = 1,1,0.5,65,10,0
+            self.seeking, self.bulletSpeed, self.camo, self.value, self.fire = False, 10, False, 500, False
+            self.lead = False
+
+        elif rank == 6:
+            #Money Tower
+            self.descriptions =[[["Big Stacks",545],["Bigger Stacks",900],["Money Plantation",2500],["Enterprise", 23500]],
+                                [["Long-lasting", 175],["Valued Output", 800],["AutoCollect", 1500],["Fast Money", 4500]]]
+            
+            self.pierce, self.damage, self.speed, self.range, self.size, self.shotAmount  = 0,0, 0.1, 100, 0,0
+            self.seeking, self.bulletSpeed, self.camo, self.value, self.fire = False, 0, False, 600, False
+            self.lead = False
+
     def draw(self):
         pygame.draw.rect(gameDisplay, (0,150,0), (self.x-5, self.y-5, 40, 40), 0)
         pygame.draw.rect(gameDisplay, self.color, (self.x, self.y, self.width, self.height),0)
         
-    def attack(self, Monsters, speed):
+    def attack(self, Monsters, speed, Board):
 
         #Display Range of tower:
         #pygame.draw.circle(gameDisplay, (0, 0, 0), (self.x, self.y), self.range, 0)
@@ -174,10 +197,18 @@ class Tower():
             elif affect[0] == "The Arctic":
                 for monster in Monsters:
                     monster[0].speedModifier = [0.4, 100]
+            elif affect[0] == "Smoke Bomb":
+                for monster in Monsters:
+                    if monster[0].x >= 0-monster[0].width*1.5:
+                        monster[0].confused = True
+            elif affect[0] == "Instant Money" and not affect[2]:
+                self.cash += 1000
+                affect[2] = True
             
             affect[1] -= 1
             if affect[1] <= 0:
                 self.effects.pop(self.effects.index(affect))
+                
                     
         #Checking to see if there is a monster in range
         if self.rank in [1,2, 3]  and self.cooldown <= 0:
@@ -213,6 +244,64 @@ class Tower():
                         self.score += 1
                         self.cash += self.damage
             self.cooldown = 50
+
+        Tiles = []
+        #Explosion Factory
+        if self.rank == 5 and self.cooldown <= 0:
+            for j, row in enumerate(Board):
+                for i, tile in enumerate(row):
+                    if tile == 1 and math.sqrt((i*40 - self.x)**2 + (j*40 - self.y)**2) <= self.range:
+                        Tiles.append((i, j))
+
+            if len(Tiles) != 0:
+                Pos = Tiles[random.randint(0, len(Tiles)-1)]
+                self.Bombs.append(Bomb((self.x+10, self.y+10), (Pos[0]*40+random.randint(0, 20), Pos[1]*40+random.randint(0, 20)), 3, self.ExplodeTime))
+            
+            self.cooldown = 50
+
+        #Updating all the towers bombs
+        for bomb in self.Bombs:
+            bomb.update(speed)
+            if bomb.Explosion:
+                for monster in Monsters:
+                    if math.sqrt((monster[0].x - bomb.x)**2 + (monster[0].y - bomb.y)**2) <= self.bombRange:
+                        self.cash += self.damage
+                        if monster[0].rank >= 6 and monster[0].rank - self.damage < 6:
+                            monster[0].duplicate = True
+                        if self.damage != 0:
+                            monster[0].ReRank(monster[0].rank-self.damage)
+                        self.pops += 1
+                        self.score += 1
+                self.Bombs.pop(self.Bombs.index(bomb))
+
+        #Money Tower
+        if self.rank == 6 and self.cooldown <= 0:
+            if not self.autoCollect:
+                run = True
+                while run:
+                    pos = (self.x+int(self.width/2)+random.randint(-1*self.range, self.range), self.y+int(self.height/2)+random.randint(-1*self.range, self.range))
+                    if math.sqrt((pos[0] - self.x)**2 + (pos[1] - self.y)**2) <= self.range:
+                        run = False
+
+                self.Crates.append(Crate((self.x+10, self.y+10), (pos[0], pos[1]), self.expireTime, self.crateValue))
+            else:
+                self.cash += self.crateValue
+            self.cooldown = 50
+
+
+        #Updating all the Money Tower Crates
+        for crate in self.Crates:
+            crate.update(speed)
+
+            if crate.expireTime <= 0:
+                self.Crates.pop(self.Crates.index(crate))
+
+            if crate.collected:
+                self.cash += crate.value
+                self.Crates.pop(self.Crates.index(crate))
+
+            
+                        
 
 
         #Updating all the towers projectiles
@@ -398,8 +487,57 @@ class Tower():
                                             self.path = 2
                                         else:
                                             self.ability.append(["The Arctic",0,750,200])
-                                    
-                                    
+
+                                elif self.rank == 5:
+                                    #Explosion Factory Tower Upgrades
+                                    if i == 0:
+                                        if self.currentUpgrade[i] == 0:
+                                            self.speed *= 1.25
+                                        elif self.currentUpgrade[i] == 1:
+                                            self.speed *= 1.35
+                                        elif self.currentUpgrade[i] == 2:
+                                            self.damage += 1
+                                            self.path = 1
+                                        else:
+                                            self.speed *= 2
+                                            self.damage += 1
+                                        
+                                    else:
+                                        if self.currentUpgrade[i] == 0:
+                                            self.bombRange *= 1.25
+                                        elif self.currentUpgrade[i] == 1:
+                                            self.range *= 1.25
+                                        elif self.currentUpgrade[i] == 2:
+                                            self.ExplodeTime *= 1.5
+                                            self.path = 2
+                                        else:
+                                            self.ability.append(["Smoke Bomb",0,750,200])
+                                
+
+                                elif self.rank == 6:
+                                    #Money Tower Upgrades
+                                    if i == 0:
+                                        if self.currentUpgrade[i] == 0:
+                                            self.speed *= 1.5
+                                        elif self.currentUpgrade[i] == 1:
+                                            self.speed *= 1.5
+                                        elif self.currentUpgrade[i] == 2:
+                                            self.speed *= 1.5
+                                            self.path = 1
+                                        else:
+                                            self.speed /= 5
+                                            self.crateValue *= 10
+                                        
+                                    else:
+                                        if self.currentUpgrade[i] == 0:
+                                            self.expireTime *= 2
+                                        elif self.currentUpgrade[i] == 1:
+                                            self.crateValue *= 2
+                                        elif self.currentUpgrade[i] == 2:
+                                            self.autoCollect = True
+                                            self.path = 2
+                                        else:
+                                            self.ability.append(["Instant Money",0,750,200])
                                 
                                 self.currentUpgrade[i] += 1
                                 self.upgrades[i][self.currentUpgrade[i]-1] = 1
@@ -407,12 +545,85 @@ class Tower():
 
             self.buyCooldown -= 1
                 
-    def update(self, Monsters, speed, cash):
+    def update(self, Monsters, speed, cash, Board):
         self.draw()
-        Monsters = self.attack(Monsters, speed)
+        Monsters = self.attack(Monsters, speed, Board)
         self.upgrade(cash)
 
         return Monsters
+
+class Crate():
+    """A Crate, full of money, usually dropped by the Money Tower"""
+
+    def __init__(self, startPos, endPos, expireTime, crateValue):
+        self.x, self.y = startPos[0], startPos[1]
+        self.endPos = endPos
+        self.angle = math.atan2((self.y-self.endPos[1]),(self.x-self.endPos[0]))
+        self.speed = 3
+        self.width, self.height = 20, 20
+        self.expireTime = expireTime
+        self.collected = False
+        self.value = crateValue
+
+    def draw(self):
+        pygame.draw.rect(gameDisplay, (150, 150, 0), (self.x, self.y, self.width, self.height), 0)
+
+    def movement(self, speed):
+        if self.endPos != (self.x, self.y):
+            self.x -= self.speed*math.cos(self.angle)*speed
+            self.y -= self.speed*math.sin(self.angle)*speed
+            if abs(self.endPos[1]-self.y)+abs(self.endPos[0]-self.x) <= self.speed*speed:
+                self.x, self.y = self.endPos[0], self.endPos[1]
+
+    def collection(self):
+        pos, pressed = pygame.mouse.get_pos(), pygame.mouse.get_pressed()
+
+        if self.x <= pos[0] <= self.x + self.width and self.y <= pos[1] <= self.y + self.height and pressed[0] == 1:
+            self.collected = True
+        
+
+    def update(self, speed):
+        self.draw()
+        self.movement(speed)
+        self.collection()
+
+        self.expireTime -= 1
+
+class Bomb():
+    """Used in the explosion factory, throws it at the path, it explodes"""
+
+    def __init__(self, startPos, endPos, speed, explodeTime):
+        self.x, self.y = startPos[0], startPos[1]
+        self.endPos = endPos
+        self.angle = math.atan2((self.y-self.endPos[1]),(self.x-self.endPos[0]))
+        self.speed = speed
+        self.width, self.height = 20, 20
+        self.Explode = explodeTime
+        self.Explosion = False
+        self.maxExplode = self.Explode + 0
+
+    def draw(self):
+        pygame.draw.rect(gameDisplay, (50+int(200-(self.Explode/self.maxExplode*100)*2), 50, 50), (self.x, self.y, self.width, self.height), 0)
+
+    def movement(self, speed):
+        if self.endPos != (self.x, self.y):
+            self.x -= self.speed*math.cos(self.angle)*speed
+            self.y -= self.speed*math.sin(self.angle)*speed
+            if abs(self.endPos[1]-self.y)+abs(self.endPos[0]-self.x) <= self.speed*speed:
+                self.x, self.y = self.endPos[0], self.endPos[1]
+
+    def explode(self, speed):
+        if self.Explode > 0:
+            self.Explode -= 1*speed
+        else:
+            self.Explosion = True
+
+    def update(self, speed):
+        self.draw()
+        self.movement(speed)
+        self.explode(speed)
+
+    
 
 class Projectile():
     """It's a projectile, towers throw it"""
@@ -470,6 +681,7 @@ class Monster():
         self.fire = [False,0,0,0,0]
         self.speedModifier = [1,0]
         self.permaslow = False
+        self.confused = False
         #All checkpoints on the map
         self.checkpoints = [(6, 5), (6, 2), (3, 2), (3, 9), (13, 9), (13, 4), (17, 4)]
         self.duplicate = False
@@ -530,23 +742,46 @@ class Monster():
     def movement(self, Lives, speed):
 
         #Checking to see whether the monster is in range of the next checkpoint
-        if (self.checkpoints[self.step][0]*40-self.speed <= self.x <= self.checkpoints[self.step][0]*40+self.speed and
-            self.checkpoints[self.step][1]*40-self.speed <= self.y <= self.checkpoints[self.step][1]*40+self.speed):
-            self.x, self.y = self.checkpoints[self.step][0]*40, self.checkpoints[self.step][1]*40
-            self.step += 1
-            if self.step == 7:
-                self.dead = True
-                Lives -= self.rank
+        if not self.confused:
+            if (self.checkpoints[self.step][0]*40-self.speed <= self.x <= self.checkpoints[self.step][0]*40+self.speed and
+                self.checkpoints[self.step][1]*40-self.speed <= self.y <= self.checkpoints[self.step][1]*40+self.speed):
+                self.x, self.y = self.checkpoints[self.step][0]*40, self.checkpoints[self.step][1]*40
+                self.step += 1
+                if self.step == 7:
+                    self.dead = True
+                    Lives -= self.rank
+            else:
+                #Else move it towards it's next checkpoint
+                if self.x < self.checkpoints[self.step][0]*40:
+                    self.x += int(self.speed*speed*self.speedModifier[0])
+                elif self.x > self.checkpoints[self.step][0]*40:
+                    self.x -= int(self.speed*speed*self.speedModifier[0])
+                elif self.y > self.checkpoints[self.step][1]*40:
+                    self.y -= int(self.speed*speed*self.speedModifier[0])
+                elif self.y < self.checkpoints[self.step][1]*40:
+                    self.y += int(self.speed*speed*self.speedModifier[0])
         else:
-            #Else move it towards it's next checkpoint
-            if self.x < self.checkpoints[self.step][0]*40:
-                self.x += int(self.speed*speed*self.speedModifier[0])
-            elif self.x > self.checkpoints[self.step][0]*40:
-                self.x -= int(self.speed*speed*self.speedModifier[0])
-            elif self.y > self.checkpoints[self.step][1]*40:
-                self.y -= int(self.speed*speed*self.speedModifier[0])
-            elif self.y < self.checkpoints[self.step][1]*40:
-                self.y += int(self.speed*speed*self.speedModifier[0])
+            if self.step == 0:
+                xCheck, yCheck = (-10000, 0)
+            else:
+                xCheck, yCheck = self.checkpoints[self.step-1][0]*40, self.checkpoints[self.step-1][1]*40
+            if (xCheck-self.speed <= self.x <= xCheck+self.speed and
+                yCheck-self.speed <= self.y <= yCheck+self.speed):
+                self.x, self.y = xCheck, yCheck
+                self.step -= 1
+                if self.step == -1:
+                    self.dead = True
+                    print("Woah, slow down buddy\nThat's too many Smoke Bombs for 1 man to handle")
+            else:
+                #Else move it towards it's next checkpoint
+                if self.x < xCheck:
+                    self.x += int(self.speed*speed*self.speedModifier[0])
+                elif self.x > xCheck:
+                    self.x -= int(self.speed*speed*self.speedModifier[0])
+                elif self.y > yCheck:
+                    self.y -= int(self.speed*speed*self.speedModifier[0])
+                elif self.y < yCheck:
+                    self.y += int(self.speed*speed*self.speedModifier[0])
 
         if self.fire[0] == True:
             self.fire[1] -= 1
@@ -568,6 +803,8 @@ class Monster():
                 self.speedModifier[0] = 0.75
         else:
             self.speedModifier[1] -= 1
+
+        self.confused = False
 
         return Lives
 
@@ -629,7 +866,7 @@ class Selection():
         keys = pygame.key.get_pressed()
 
         #Drawing the selection of towers
-        for j in range(2):
+        for j in range(3):
             for i in range(2):
                 if 660+i*100 <= pos[0] <= 660+i*100+60 and 150+j*70 <= pos[1] <= 150+j*70+60 and pressed[0] == 1:
                     self.selected = i+j*2+1
@@ -766,7 +1003,7 @@ def genEnemies(wave):
         for i in range(5):
             Monsters.append([Monster(6, wave, False),30*(i)])
 
-        Monsters.append(Monster(7, wave, False), 150) 
+        Monsters.append([Monster(7, wave, False), 150])
     elif wave == 21:
         for j in range(7):
             for i in range(5):
@@ -798,7 +1035,7 @@ def genEnemies(wave):
             elif n <= 150-wave:
                 Monsters.append([Monster(6, wave, random.randint(1,10)==1),random.randint(15,30)*(i)])
             else:
-                Monsters.append([Monster(7, wave, False),random.randint(15,30)*(i)])
+                Monsters.append([Monster(7, wave, random.randint(1,100)==1),random.randint(15,30)*(i)])
 
     
     return Monsters
@@ -931,8 +1168,8 @@ def game_loop():
 
         #Making the selection bar
         pygame.draw.rect(gameDisplay, (130, 90, 50), (640, 0, 200, 580), 0)
-        ColorBoard = [[(200, 0, 0), (0, 0, 200)], [(200, 200, 0), (0, 200, 200)], [(200, 0, 200), (100, 100, 100)], [(200, 200, 200), (100, 150, 200)]]
-        for j in range(2):
+        ColorBoard = [[(200, 0, 0), (0, 0, 200)], [(200, 200, 0), (0, 200, 200)], [(100, 100, 100), (0, 200, 0)], [(200, 200, 200), (100, 150, 200)]]
+        for j in range(3):
             for i in range(2):
                 pygame.draw.rect(gameDisplay, (140, 90, 40), (660+i*100, 150+j*70, 60, 60), 0)
                 pygame.draw.rect(gameDisplay, (210, 180, 140), (660+i*100, 150+j*70, 60, 60), 3)
@@ -962,7 +1199,7 @@ def game_loop():
                 try:
                     tile = int(tile)
                 except Exception:
-                    tile.update(Monsters, startButton.speed, Cash)
+                    tile.update(Monsters, startButton.speed, Cash, Board)
                     if tile.x <= pos[0] <= tile.x + tile.width and tile.y <= pos[1] <= tile.y + tile.height and pressed[0] == True:
                         for h, k in enumerate(Board):
                             for l, s in enumerate(k):
