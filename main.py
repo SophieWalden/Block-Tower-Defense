@@ -28,10 +28,6 @@ font = pygame.font.Font("IBMPlexSans-Regular.ttf", 20)
 # Late Game Content:
 # Main Menu
 # Different Maps
-#
-# Changes:
-# Added Explosion Factory
-# 
 
 def load_images(path_to_directory):
     """Loads all images"""
@@ -1104,7 +1100,7 @@ def game_loop():
 
     width, height = 16, 12
     Board = setup_Board([[0]*width for _ in range(height)])
-    Lives, Cash = 100, 750
+    Lives, Cash = 100, 75000
     selection = Selection()
     score = 0
     startButton = Start()
@@ -1282,6 +1278,13 @@ def game_loop():
 
                 elif k == "The Arctic":
                     gameDisplay.blit(pygame.transform.scale(Images["TheArctic"],(100,30)),(-20+55*count,435))
+
+                elif k == "Smoke Bomb":
+                    gameDisplay.blit(pygame.transform.scale(Images["SmokeBomb"],(50,50)),(55*count,425))
+
+                elif k == "Instant Money":
+                    gameDisplay.blit(pygame.transform.scale(Images["InstantMoney"],(30,30)),(15+55*count,435))
+                    
                     
                 gameDisplay.blit(font.render(str(v), True, (0, 0, 0)), (40+55*count, 450))
 
