@@ -283,20 +283,6 @@ class Tower():
             else:
                 self.cash += self.crateValue
             self.cooldown = 50
-
-
-        #Updating all the Money Tower Crates
-        for crate in self.Crates:
-            crate.update(speed)
-
-            if crate.expireTime <= 0:
-                self.Crates.pop(self.Crates.index(crate))
-
-            if crate.collected:
-                self.cash += crate.value
-                self.Crates.pop(self.Crates.index(crate))
-
-            
                         
 
 
@@ -574,7 +560,7 @@ class Crate():
     def collection(self):
         pos, pressed = pygame.mouse.get_pos(), pygame.mouse.get_pressed()
 
-        if self.x <= pos[0] <= self.x + self.width and self.y <= pos[1] <= self.y + self.height and pressed[0] == 1:
+        if self.x <= pos[0] <= self.x + self.width and self.y <= pos[1] <= self.y + self.height:
             self.collected = True
         
 
@@ -1100,7 +1086,7 @@ def game_loop():
 
     width, height = 16, 12
     Board = setup_Board([[0]*width for _ in range(height)])
-    Lives, Cash = 100, 75000
+    Lives, Cash = 100, 750
     selection = Selection()
     score = 0
     startButton = Start()
@@ -1235,6 +1221,24 @@ def game_loop():
 
         #The autoplay button
         autoPlay.update()
+
+        #Updating all crates so their drawn on a higher level then towers
+        #Updating all the Money Tower Crates
+        for j, row in enumerate(Board):
+            for i, tile in enumerate(row):
+                try:
+                    tile = int(tile)
+                except Exception:
+                    if tile.rank == 6:
+                        for crate in tile.Crates:
+                            crate.update(startButton.speed)
+
+                            if crate.expireTime <= 0:
+                                tile.Crates.pop(tile.Crates.index(crate))
+
+                            if crate.collected:
+                                Cash += crate.value
+                                tile.Crates.pop(tile.Crates.index(crate))
 
         #Abilities
         Abilities = []
