@@ -19,6 +19,8 @@ font = pygame.font.Font("IBMPlexSans-Regular.ttf", 20)
 # Ice Tower (Slows/Pops Lead) (Finished)
 # Explosion Factory (Pops Lead/Aoe Damage) (Finished)
 # Money Tower (Generates Money) (Working On)
+# Glaive Tower
+# Super Tower
 #
 # Bloons:
 # Lead Bloons (Finished)
@@ -120,6 +122,11 @@ class Tower():
         self.crateValue = 25
         self.autoCollect = False
         self.expireTime = 300
+        self.glaiveCount = 1
+        self.glaiveSpeed = 5
+        self.glaiveRings = 1
+        self.Glaives = []
+    
 
         self.description = [[["",0]]*4]*2
         #Putting in all the distinct upgrades
@@ -172,6 +179,22 @@ class Tower():
             self.seeking, self.bulletSpeed, self.camo, self.value, self.fire = False, 0, False, 600, False
             self.lead = False
 
+        elif rank == 7:
+            self.descriptions =[[["Faster Faster",545],["Double Glaives",900],["QUADRA GLAVES",3500],["Gyro Glaves", 30000]],
+                                [["Sonic?", 455],["Damaging Glaves", 800],["Double Ringed Glaives", 1500],["Complete Reform", 50000]]]
+            
+            self.pierce, self.damage, self.speed, self.range, self.size, self.shotAmount  = 0,1, 0.1, 100, 0,0
+            self.seeking, self.bulletSpeed, self.camo, self.value, self.fire = False, 0, False, 700, False
+            self.lead = False
+
+        elif rank == 8:
+            self.descriptions =[[["Firen Ma Lazar",1500],["Thick Lazer",2500],["Double Lazer?",50000],["Unbeatable", 100000]],
+                                [["Bigger Range", 800],["Biggest Range", 1500],["Mini-Death", 9000],["Unleash Havoc", 26000]]]
+            
+            self.pierce, self.damage, self.speed, self.range, self.size, self.shotAmount  = 5,1, 3, 200, 10,1
+            self.seeking, self.bulletSpeed, self.camo, self.value, self.fire = False, 10, False, 800, False
+            self.lead = False
+
     def draw(self):
         pygame.draw.rect(gameDisplay, (0,150,0), (self.x-5, self.y-5, 40, 40), 0)
         pygame.draw.rect(gameDisplay, self.color, (self.x, self.y, self.width, self.height),0)
@@ -200,14 +223,22 @@ class Tower():
             elif affect[0] == "Instant Money" and not affect[2]:
                 self.cash += 1000
                 affect[2] = True
-            
+            elif affect[0] == "Complete Reform":
+                self.glaiveCount = 10
+                self.glaiveRings = 3
+                affect[1] = 5
+            elif affect[0] == "Unleash Havoc":
+                for i in range(36):
+                    self.Projectiles.append(Projectile(self.x+int(self.width/2), self.y+int(self.height/2), i*0.2, self.pierce, self.size, self.bulletSpeed,random.randint(0,1000000)))
+                
+                
             affect[1] -= 1
             if affect[1] <= 0:
                 self.effects.pop(self.effects.index(affect))
                 
                     
         #Checking to see if there is a monster in range
-        if self.rank in [1,2, 3]  and self.cooldown <= 0:
+        if self.rank in [1,2, 3, 8]  and self.cooldown <= 0:
             for monster in Monsters:
                 if math.sqrt((monster[0].x - self.x)**2 + (monster[0].y - self.y)**2) <= self.range and self.cooldown <= 0:
                     if not monster[0].camo or (monster[0].camo and self.camo):
@@ -283,6 +314,47 @@ class Tower():
             else:
                 self.cash += self.crateValue
             self.cooldown = 50
+
+        #Glaive tower
+        if self.rank == 7:
+            while len(self.Glaives) != self.glaiveCount:
+                angle = 0
+                if self.glaiveRings == 1:
+                    ring = 1
+                else:
+                    if len(self.Glaives) % 2 == 1:
+                        ring = 2
+                    else:
+                        ring = 1
+
+                if len(self.Glaives) != 0:
+                    count = 0
+                    currentAngle = 0
+                    stop = False
+                    for glaive in self.Glaives:
+                        if glaive.ring == ring:
+                            count += 1
+                            if not stop:
+                                stop = True
+                                currentAngle = glaive.angle
+                    if count % 2 == 1:
+                        angle = (currentAngle-(6.25/(count+1)))
+                    else:
+                        angle = (currentAngle-(6.25/(count+1))) - 3.25
+         
+                self.Glaives.append(Glaive((self.x + int(self.width/4), self.y + int(self.height/4)), angle, ring, self.glaiveSpeed))
+
+        for glaive in self.Glaives:
+            for monster in Monsters:
+                if pygame.sprite.collide_rect(glaive, monster[0]) == True and glaive.id not in monster[0].hit:
+                    monster[0].hit.append(glaive.id)
+                    self.cash += self.damage
+                    if monster[0].rank >= 6 and monster[0].rank - self.damage < 6:
+                        monster[0].duplicate = True
+                    if self.damage != 0:
+                        monster[0].ReRank(monster[0].rank-self.damage)
+                    self.pops += 1
+                    self.score += 1
                         
 
 
@@ -520,6 +592,64 @@ class Tower():
                                             self.path = 2
                                         else:
                                             self.ability.append(["Instant Money",0,750,200])
+
+                                elif self.rank == 7:
+                                    #Glaive Tower
+                                    if i == 0:
+                                        if self.currentUpgrade[i] == 0:
+                                            self.glaiveSpeed *= 1.5
+                                        elif self.currentUpgrade[i] == 1:
+                                            self.glaiveCount += 1
+                                        elif self.currentUpgrade[i] == 2:
+                                            self.glaiveCount += 2
+                                            self.path = 1
+                                        else:
+                                            self.glaiveCount += 4
+                                            
+                                        
+                                    else:
+                                        if self.currentUpgrade[i] == 0:
+                                            self.glaiveSpeed *= 1.4
+                                        elif self.currentUpgrade[i] == 1:
+                                            self.damage += 1
+                                        elif self.currentUpgrade[i] == 2:
+                                            self.glaiveRings += 1
+                                            self.glaiveCount += 1
+                                            self.path = 2
+                                        else:
+                                            self.ability.append(["Complete Reform",0,-1,200])
+
+                                elif self.rank == 8:
+                                    #Glaive Tower
+                                    if i == 0:
+                                        if self.currentUpgrade[i] == 0:
+                                            self.speed *= 5
+                                            self.lead = True
+                                        elif self.currentUpgrade[i] == 1:
+                                            self.size += 10
+                                        elif self.currentUpgrade[i] == 2:
+                                            self.shotAmount += 1
+                                            self.path = 1
+                                        else:
+                                            self.camo = True
+                                            self.shotAmount += 4
+                                            
+                                        
+                                    else:
+                                        if self.currentUpgrade[i] == 0:
+                                            self.range *= 2
+                                        elif self.currentUpgrade[i] == 1:
+                                            self.range *= 2
+                                        elif self.currentUpgrade[i] == 2:
+                                            if self.size == 10:
+                                                self.size = 5
+                                            else:
+                                                self.size = 10
+                                            self.path = 2
+                                        else:
+                                            self.ability.append(["Unleash Havoc",0, 1000,200])
+            
+
                                 
                                 self.currentUpgrade[i] += 1
                                 self.upgrades[i][self.currentUpgrade[i]-1] = 1
@@ -533,6 +663,55 @@ class Tower():
         self.upgrade(cash)
 
         return Monsters
+
+class Glaive():
+    """Made for the Glaive Tower"""
+
+    def __init__(self, pos, angle, ring, rotateSpeed):
+        self.startPos = pos
+        self.x, self.y = pos[0], pos[1]
+        self.width, self.height = 15, 15
+        self.angle = angle
+        self.rotateSpeed = rotateSpeed
+        if ring == 1:
+            self.speed = 50
+        else:
+            self.speed = 85
+        self.ring = ring
+
+        self.id = random.randint(0, 1000000)
+
+        #Setting up the hitbox
+        self.image = pygame.Surface([self.width, self.height])
+        self.rect = self.image.get_rect()
+        self.rect.top = self.y
+        self.rect.bottom = self.y + self.height
+        self.rect.left = self.x
+        self.rect.right = self.x + self.width
+
+
+    def draw(self):
+        pygame.draw.rect(gameDisplay, (0, 0, 0), (self.x, self.y, self.width, self.height), 0)
+
+    def movement(self, speed):
+        self.angle += 0.05*speed
+        self.x, self.y = self.speed*math.cos(self.angle) + self.startPos[0], self.speed*math.sin(self.angle) + self.startPos[1]
+
+        if (self.x, self.y) == (self.speed*math.cos(0) + self.startPos[0], self.speed*math.sin(0) + self.startPos[0]):
+            self.angle = 0
+            self.id = random.randint(0, 1000000)
+        
+
+    def update(self, speed):
+        self.movement(speed)
+        self.draw()
+
+        #Updating Hitbox
+        self.rect.top = self.y
+        self.rect.bottom = self.y + self.height
+        self.rect.left = self.x
+        self.rect.right = self.x + self.width
+        
 
 class Crate():
     """A Crate, full of money, usually dropped by the Money Tower"""
@@ -652,8 +831,8 @@ class Monster():
         self.x, self.y = -100, 200
         self.step = 0
         speed = [2, 3, 4, 5, 6, 4, 3]
-        modifier = 0.01*(int(wave/50)+1)
-        self.speed = speed[self.rank-1] * (1 + (modifier**wave))
+        self.speed = speed[self.rank-1] * (1 + (0.01*(int(wave/50)+1)*wave))
+        self.wave = wave
         self.height, self.width = 30, 30
         self.dead = False
         Colors = [(200, 0, 0), (0, 0, 200), (0, 200, 0), (255, 255, 0), (255,105,180), (0, 0, 0), (50, 50, 50)]
@@ -687,7 +866,7 @@ class Monster():
             Colors = [(200, 0, 0), (0, 0, 200), (0, 200, 0), (255, 255, 0), (255,105,180), (0, 0, 0), (50, 50, 50)]
             self.color = Colors[self.rank-1]
             speed = [2, 3, 4, 5, 6, 4, 3]
-            self.speed = speed[self.rank-1]
+            self.speed = speed[self.rank-1] * (1 + (0.01*(int(self.wave/50)+1)*self.wave))
         
         
     def draw(self):
@@ -848,7 +1027,7 @@ class Selection():
         keys = pygame.key.get_pressed()
 
         #Drawing the selection of towers
-        for j in range(3):
+        for j in range(4):
             for i in range(2):
                 if 660+i*100 <= pos[0] <= 660+i*100+60 and 150+j*70 <= pos[1] <= 150+j*70+60 and pressed[0] == 1:
                     self.selected = i+j*2+1
@@ -1151,7 +1330,7 @@ def game_loop():
         #Making the selection bar
         pygame.draw.rect(gameDisplay, (130, 90, 50), (640, 0, 200, 580), 0)
         ColorBoard = [[(200, 0, 0), (0, 0, 200)], [(200, 200, 0), (0, 200, 200)], [(100, 100, 100), (0, 200, 0)], [(200, 200, 200), (100, 150, 200)]]
-        for j in range(3):
+        for j in range(4):
             for i in range(2):
                 pygame.draw.rect(gameDisplay, (140, 90, 40), (660+i*100, 150+j*70, 60, 60), 0)
                 pygame.draw.rect(gameDisplay, (210, 180, 140), (660+i*100, 150+j*70, 60, 60), 3)
@@ -1223,7 +1402,6 @@ def game_loop():
         autoPlay.update()
 
         #Updating all crates so their drawn on a higher level then towers
-        #Updating all the Money Tower Crates
         for j, row in enumerate(Board):
             for i, tile in enumerate(row):
                 try:
@@ -1239,6 +1417,9 @@ def game_loop():
                             if crate.collected:
                                 Cash += crate.value
                                 tile.Crates.pop(tile.Crates.index(crate))
+                    elif tile.rank == 7:
+                        for glaive in tile.Glaives:
+                            glaive.update(startButton.speed)
 
         #Abilities
         Abilities = []
@@ -1249,8 +1430,10 @@ def game_loop():
                 except Exception:
                     for ability in tile.ability:
                         #Checks for all ready abilities
-                        if ability[1] <= 0:
+                        if ability[1] == 0:
                             Abilities.append(ability[0])
+                        elif ability[1] == -1:
+                            pass
                         else:
                             ability[1] -= 1
 
@@ -1288,7 +1471,11 @@ def game_loop():
 
                 elif k == "Instant Money":
                     gameDisplay.blit(pygame.transform.scale(Images["InstantMoney"],(30,30)),(15+55*count,435))
-                    
+
+                elif k == "Complete Reform":
+                    gameDisplay.blit(pygame.transform.scale(Images["CompleteReform"],(30,30)),(15+55*count,435))
+                elif k == "Unleash Havoc":
+                    gameDisplay.blit(pygame.transform.scale(Images["UnleashHavoc"],(30,30)),(15+55*count,435))
                     
                 gameDisplay.blit(font.render(str(v), True, (0, 0, 0)), (40+55*count, 450))
 
