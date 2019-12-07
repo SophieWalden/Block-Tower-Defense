@@ -264,12 +264,16 @@ class Tower():
                     if self.Permaslow:
                         monster[0].permaslow = True
                     if self.damage != 0 and ((monster[0].rank == 7 and self.lead) or not monster[0].rank == 7):
-                        monster[0].ReRank(monster[0].rank-self.damage)
+                        if monster[0].rank > 7 and self.damage != 0:
+                            modifier = 1
+                        else:
+                            modifier = 0
+                        monster[0].ReRank(monster[0].rank-self.damage - modifier)
                         if monster[0].rank >= 6 and monster[0].rank - self.damage < 6:
                             monster[0].duplicate = True
-                        self.pops += 1
-                        self.score += 1
-                        self.cash += self.damage
+                        self.pops += self.damage
+                        self.score += self.damage
+                        self.cash += self.damage 
             self.cooldown = 50
 
         Tiles = []
@@ -295,10 +299,14 @@ class Tower():
                         self.cash += self.damage
                         if monster[0].rank >= 6 and monster[0].rank - self.damage < 6:
                             monster[0].duplicate = True
+                        if monster[0].rank > 7 and self.damage != 0:
+                            modifier = 1
+                        else:
+                            modifier = 0
                         if self.damage != 0:
-                            monster[0].ReRank(monster[0].rank-self.damage)
-                        self.pops += 1
-                        self.score += 1
+                            monster[0].ReRank(monster[0].rank-self.damage-modifier)
+                        self.pops += self.damage
+                        self.score += self.damage
                 self.Bombs.pop(self.Bombs.index(bomb))
 
         #Money Tower
@@ -351,8 +359,13 @@ class Tower():
                     self.cash += self.damage
                     if monster[0].rank >= 6 and monster[0].rank - self.damage < 6:
                         monster[0].duplicate = True
+                    if monster[0].rank > 7 and self.damage != 0:
+                        modifier = 1
+                    else:
+                        modifier = 0
                     if self.damage != 0:
-                        monster[0].ReRank(monster[0].rank-self.damage)
+                        monster[0].ReRank(monster[0].rank-self.damage+modifier)
+                    
                     self.pops += 1
                     self.score += 1
                         
@@ -365,16 +378,25 @@ class Tower():
             for monster in Monsters:
                 if pygame.sprite.collide_rect(projectile, monster[0]) == True and not stop and projectile.id not in monster[0].hit and ((self.fire and not monster[0].fire[0]) or not self.fire) and (((monster[0].rank == 7) == self.lead) or not monster[0].rank == 7):
                     self.cash += self.damage
+                
                     if monster[0].rank >= 6 and monster[0].rank - self.damage < 6:
                         monster[0].duplicate = True
+                    if monster[0].rank > 7 and monster[0].rank - self.damage <= 7:
+                        modifier = 1
+                    else:
+                        modifier = 0
                     if self.damage != 0:
-                        monster[0].ReRank(monster[0].rank-self.damage)
+                        if monster[0].health - self.damage <= 0:
+                            monster[0].ReRank(monster[0].rank-self.damage-modifier)
+                        else:
+                            monster[0].health -= self.damage
+                    
                     monster[0].hit.append(projectile.id)
                     if self.fire:
                         monster[0].fire = [True, self.fireLength, self.fireLength, self.fireLasting, self.fireDamage]
                     stop = True
-                    self.pops += 1
-                    self.score += 1
+                    self.pops += self.damage
+                    self.score += self.damage
                     if self.seeking == True:
                         for monster in Monsters:
                             if math.sqrt((monster[0].x - projectile.x)**2 + (monster[0].y - projectile.y)**2) <= self.range*2 and projectile.id not in monster[0].hit:
@@ -830,12 +852,12 @@ class Monster():
         self.rank = rank
         self.x, self.y = -100, 200
         self.step = 0
-        speed = [2, 3, 4, 5, 6, 4, 3]
+        speed = [2, 3, 4, 5, 6, 4, 3, 1, 2]
         self.speed = speed[self.rank-1] * (1 + (0.01*(int(wave/50)+1)*wave))
         self.wave = wave
         self.height, self.width = 30, 30
         self.dead = False
-        Colors = [(200, 0, 0), (0, 0, 200), (0, 200, 0), (255, 255, 0), (255,105,180), (0, 0, 0), (50, 50, 50)]
+        Colors = [(200, 0, 0), (0, 0, 200), (0, 200, 0), (255, 255, 0), (255,105,180), (0, 0, 0), (50, 50, 50), (128, 0, 128), (0, 100, 0)]
         self.color = Colors[self.rank-1]
         self.camo = camo
         self.hit = []
@@ -843,6 +865,10 @@ class Monster():
         self.speedModifier = [1,0]
         self.permaslow = False
         self.confused = False
+        self.health = 1
+        if self.rank == 9:
+            self.health = 3
+        self.addMonster = []
         #All checkpoints on the map
         self.checkpoints = [(6, 5), (6, 2), (3, 2), (3, 9), (13, 9), (13, 4), (17, 4)]
         self.duplicate = False
@@ -859,17 +885,22 @@ class Monster():
     def ReRank(self, new_Rank):
         """Changes the rank of the monster to any other rank"""
 
+
+        if self.rank == 8 and new_Rank != 8:
+            self.addMonster.append(5)
         if new_Rank <= 0:
             self.dead = True
         else:
             self.rank = new_Rank
-            Colors = [(200, 0, 0), (0, 0, 200), (0, 200, 0), (255, 255, 0), (255,105,180), (0, 0, 0), (50, 50, 50)]
+            Colors = [(200, 0, 0), (0, 0, 200), (0, 200, 0), (255, 255, 0), (255,105,180), (0, 0, 0), (50, 50, 50), (128, 0, 128), (0, 100, 0)]
             self.color = Colors[self.rank-1]
-            speed = [2, 3, 4, 5, 6, 4, 3]
+            speed = [2, 3, 4, 5, 6, 4, 3, 1, 2]
             self.speed = speed[self.rank-1] * (1 + (0.01*(int(self.wave/50)+1)*self.wave))
+            if self.rank == 9:
+                self.health = 3
         
         
-    def draw(self):
+    def draw(self): 
         pygame.draw.rect(gameDisplay, self.color, (self.x + int(self.width/5), self.y + int(self.height/5), self.width, self.height), 0)
 
         #Drawing camo bloons
@@ -1195,8 +1226,12 @@ def genEnemies(wave):
                 Monsters.append([Monster(5, wave, random.randint(1,10)==1),random.randint(15,30)*(i)])
             elif n <= 150-wave:
                 Monsters.append([Monster(6, wave, random.randint(1,10)==1),random.randint(15,30)*(i)])
-            else:
+            elif n <= 175-wave:
                 Monsters.append([Monster(7, wave, random.randint(1,100)==1),random.randint(15,30)*(i)])
+            elif n <= 200-wave:
+                Monsters.append([Monster(8, wave, random.randint(1,10)==1),random.randint(15,30)*(i)])
+            elif n <= 225-wave: 
+                Monsters.append([Monster(9, wave, random.randint(1,10)==1),random.randint(15,30)*(i)])
 
     
     return Monsters
@@ -1265,7 +1300,7 @@ def game_loop():
 
     width, height = 16, 12
     Board = setup_Board([[0]*width for _ in range(height)])
-    Lives, Cash = 100, 750
+    Lives, Cash = 100, 750000
     selection = Selection()
     score = 0
     startButton = Start()
@@ -1274,7 +1309,7 @@ def game_loop():
     abilityCooldown = False
 
     #Generating each of the waves
-    wave = 1
+    wave = 200
     Monsters = genEnemies(wave)
     
     game_run = True
@@ -1314,6 +1349,18 @@ def game_loop():
                         tempMonster[0].fire = monster[0].fire
                         tempMonster[0].speedModifier = monster[0].speedModifier
                         Monsters.append(tempMonster)
+                    if len(monster[0].addMonster) != 0:
+                        for i, mons in enumerate(monster[0].addMonster):
+                            tempMonster = [Monster(mons,wave,monster[0].camo),monster[1]-30*(i+1)]
+                            tempMonster[0].x, tempMonster[0].y = monster[0].x, monster[0].y
+                            tempMonster[0].step = monster[0].step
+                            tempMonster[0].cooldown = 5
+                            tempMonster[0].hit = monster[0].hit
+                            tempMonster[0].fire = monster[0].fire
+                            tempMonster[0].speedModifier = monster[0].speedModifier
+                            Monsters.append(tempMonster)
+                    monster[0].addMonster = []
+                                
         if len(Monsters) == 0:
             Cash += 100+wave+1
             wave += 1
