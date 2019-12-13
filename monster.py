@@ -97,15 +97,16 @@ class Monster():
 
 
 
-            if self.fire[0]:
-                colors = [(255,0,0), (255,165,0), (255,255,0)]
-                for i in range(9):
-                    pygame.draw.rect(gameDisplay, colors[random.randint(0,2)], (self.x+random.randint(5, 20), self.y+random.randint(5, 20), random.randint(5, 20), random.randint(5, 20)), 0)
+        if self.fire[0]:
+            colors = [(255,0,0), (255,165,0), (255,255,0)]
+            for i in range(9):
+                pygame.draw.rect(gameDisplay, colors[random.randint(0,2)], (self.x+random.randint(5, 20), self.y+random.randint(5, 20), random.randint(5, 20), random.randint(5, 20)), 0)
 
-            if self.rank != 10:
-                pygame.draw.rect(gameDisplay, (100, 100, 100), (self.x + int(self.width/5), self.y + int(self.height/5), self.width, self.height), 2)
-            else:
-                pygame.draw.rect(gameDisplay, (100, 100, 100), (self.x - int(self.width/3), self.y - int(self.height/3), self.width*2, self.height*2), 2)
+        if self.rank != 10:
+            pygame.draw.rect(gameDisplay, (100, 100, 100), (self.x + int(self.width/5), self.y + int(self.height/5), self.width, self.height), 2)
+        else:
+    
+            pygame.draw.rect(gameDisplay, (100, 100, 100), (self.x - int(self.width/3), self.y - int(self.height/3), self.width*2, self.height*2), 2)
 
     def movement(self, Lives, speed):
 
