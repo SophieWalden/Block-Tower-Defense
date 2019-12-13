@@ -40,3 +40,13 @@ v 0.6a1:
 Tanky Purple Update:
 Purple Monster added
 Tank Monster added
+
+v 0.6a2:
+Split main.py into 3 files for easier viewing
+Squashed some bugs
+
+v 0.6a3:
+Added another file for the generation of waves
+Added a button to open up settings 
+Made all the buttons more clear on what they did
+Added flamethrower sprite, the first of many towers to have their graphics updated.
