@@ -1,4 +1,4 @@
-import pygame, random, sys, math, os, monster, tower
+import pygame, random, sys, math, os, tower, waves, monsters
 from pygame.locals import *
  
 pygame.init()
@@ -9,7 +9,8 @@ fpsClock = pygame.time.Clock()
 width, height = 840, 580
 gameDisplay = pygame.display.set_mode((width, height), pygame.SRCALPHA, 32)
 
-font = pygame.font.Font("IBMPlexSans-Regular.ttf", 20)
+font_20 = pygame.font.Font("IBMPlexSans-Regular.ttf", 20)
+font_15 = pygame.font.Font("IBMPlexSans-Regular.ttf", 15)
 
 # TODO List:
 #
@@ -39,7 +40,6 @@ def load_images(path_to_directory):
             if name.endswith('.png'):
                 key = name[:-4]
                 img = pygame.image.load(os.path.join(dirpath, name)).convert_alpha()
-   
                 images[key] = img
     return images
     
@@ -94,9 +94,9 @@ class Selection():
 
         #Displays costs of certain towers
         if self.selected != 0:
-            gameDisplay.blit(font.render(str(self.names[self.selected-1]), True, (0, 0, 0)), (
-                740-int(font.size(str(self.names[self.selected-1]))[0]/2), 425))
-            gameDisplay.blit(font.render("Cost: " + str(self.Costs[self.selected-1]), True, (0, 0, 0)), (690, 450))
+            gameDisplay.blit(font_20.render(str(self.names[self.selected-1]), True, (0, 0, 0)), (
+                740-int(font_20.size(str(self.names[self.selected-1]))[0]/2), 425))
+            gameDisplay.blit(font_20.render("Cost: " + str(self.Costs[self.selected-1]), True, (0, 0, 0)), (690, 450))
 
 
         #Buying a new tower
@@ -118,156 +118,7 @@ class Selection():
         return board, cash
     
 
-def genEnemies(wave, Images):
-    """Outputs a list of all enemies based on a certain wave"""
-    Monsters = []
-    if wave == 1:
-        for i in range(20):
-            Monsters.append([monster.Monster(1, wave, False, Images),30*i])
-    elif wave == 2:
-        for i in range(35):
-            Monsters.append([monster.Monster(1, wave, False, Images),15*i])
-    elif wave == 3:
-        for i in range(5):
-            Monsters.append([monster.Monster(2, wave, False, Images),60*i])
-        for i in range(20):
-            Monsters.append([monster.Monster(1, wave, False, Images),30*(i+21)])
-    elif wave == 4:
-        for j in range(5):
-            for i in range(2):
-                Monsters.append([monster.Monster(2, wave, False, Images),45*(i+j*10)])
-            for i in range(8):
-                Monsters.append([monster.Monster(1, wave, False, Images),30*(i+j*10+2)])
-    elif wave == 5:
-        for j in range(3):
-            Monsters.append([monster.Monster(1, wave, False, Images),30*(1+j*10)])
-            for i in range(9):
-                Monsters.append([monster.Monster(2, wave, False, Images),30*(i+1+j*10)])
-    elif wave == 6:
-        for j in range(3):
-            for i in range(5):
-                Monsters.append([monster.Monster(1, wave, False, Images),30*(i*2+j*11)])
-                Monsters.append([monster.Monster(2, wave, False, Images),30*(i*2+1+j*11)])
-            Monsters.append([monster.Monster(3, wave, False, Images),30*(10+j*11)])
-        Monsters.append([monster.Monster(3, wave, False, Images),60*(18)])
-    elif wave == 7:
-        for j in range(5):
-            for i in range(4):
-                Monsters.append([monster.Monster(1, wave, False, Images),30*(i*2+j*9)])
-                Monsters.append([monster.Monster(2, wave, False, Images),30*(i*2+1+j*9)])
-            Monsters.append([monster.Monster(3, wave, False, Images),30*(8+j*9)])
-    elif wave == 8:
-        for i in range(10):
-            Monsters.append([monster.Monster(1, wave, False, Images),30*i])
-        for i in range(20):
-            Monsters.append([monster.Monster(2, wave, False, Images),30*(i+10)])
-        for i in range(14):
-            Monsters.append([monster.monster.Monster(3, wave, False, Images),30*(i+30)])
-    elif wave == 9:
-        for i in range(30):
-            Monsters.append([monster.Monster(3, wave, False, Images),45*i])
-    elif wave == 10:
-        for i in range(102):
-            Monsters.append([monster.Monster(2, wave, False, Images),20*i])
-    elif wave == 11:
-        for j in range(3):
-            for i in range(2):
-                Monsters.append([monster.Monster(1, wave, False, Images),30*(i+j*11)])
-            for i in range(4):
-                Monsters.append([monster.Monster(2, wave, False, Images),30*(i*2+j*11)])
-                Monsters.append([monster.Monster(3, wave, False, Images),30*(i*2+1+j*11)])
-            Monsters.append([monster.Monster(4, wave, False, Images),30*(10+j*11)])
-    elif wave == 12:
-        for j in range(5):
-            for i in range(3):
-                Monsters.append([monster.Monster(2, wave, False, Images),30*(i+j*7)])
-            for i in range(2):
-                Monsters.append([monster.Monster(3, wave, False, Images),30*(i+3+j*7)])
-            Monsters.append([monster.Monster(4, wave, False, Images),30*(6+j*7)])
-    elif wave == 13:
-        for i in range(50):
-            Monsters.append([monster.Monster(2, wave, False, Images),15*(i)])
-        for i in range(23):
-            Monsters.append([monster.Monster(3, wave, False, Images),15*(i+50)])
-    elif wave == 14:
-        for i in range(10):
-            Monsters.append([monster.Monster(3, wave, False, Images),30*(i)])
-        for i in range(20):
-            Monsters.append([monster.Monster(2, wave, False, Images),30*(i+10)])
-        for i in range(8):
-            Monsters.append([monster.Monster(4, wave, False, Images),30*(i+30)])
-    elif wave == 15:
-        for j in range(5):
-            Monsters.append([monster.Monster(1, wave, False, Images),30*(1+j*5)])
-            Monsters.append([monster.Monster(2, wave, False, Images),30*(2+j*5)])
-            Monsters.append([monster.Monster(3, wave, False, Images),30*(3+j*5)])
-            Monsters.append([monster.Monster(4, wave, False, Images),30*(4+j*5)])
-            Monsters.append([monster.Monster(5, wave, False, Images),30*(5+j*5)])
-    elif wave == 16:
-        for j in range(8):
-            for i in range(5):
-                Monsters.append([monster.Monster(3, wave, False, Images),30*(i+j*6)])
-            Monsters.append([monster.Monster(4, wave, False, Images),30*(5+j*6)])
-    elif wave == 17:
-        for i in range(12):
-            Monsters.append([monster.Monster(4, wave, False, Images),30*(i)])
-    elif wave == 18:
-        for i in range(80):
-            Monsters.append([monster.Monster(3, wave, False, Images),20*(i)])
-    elif wave == 19:
-        for i in range(5):
-            Monsters.append([monster.Monster(3, wave, False, Images),30*(i)])
-        for i in range(7):
-            Monsters.append([monster.Monster(5, wave, False, Images),30*(i+5)])
-        for i in range(10):
-            Monsters.append([monster.Monster(4, wave, False, Images),30*(i+12)])
-    elif wave == 20:
-        for i in range(5):
-            Monsters.append([monster.Monster(6, wave, False, Images),30*(i)])
 
-        Monsters.append([monster.Monster(7, wave, False, Images), 150])
-    elif wave == 21:
-        for j in range(7):
-            for i in range(5):
-                Monsters.append([monster.Monster(4, wave, False, Images),30*(i+j*6)])
-            Monsters.append([monster.Monster(5, wave, False, Images),30*(5+j*6)])
-    elif wave == 22:
-        for i in range(16):
-            Monsters.append([monster.Monster(6, wave, False, Images),60*(i)])
-    elif wave == 23:
-        for i in range(7):
-            Monsters.append([monster.Monster(5, wave, False, Images),30*(i*2)])
-            Monsters.append([monster.Monster(6, wave, False, Images),30*(i*2+1)])
-    elif wave == 24:
-        for i in range(5):
-            Monsters.append([monster.Monster(3, wave, True, Images),30*(i)])
-    elif wave % 25 == 0 and wave != 25:
-        Monsters.append([monster.Monster(10, wave, False, Images),30])
-    else:
-        for i in range(random.randint(5,15)):
-            n = random.randint(1, 100)
-            if n <= 50-wave:
-                Monsters.append([monster.Monster(1, wave, random.randint(1,10)==1, Images),random.randint(15,30)*(i)])
-            elif n <= 70-wave:
-                Monsters.append([monster.Monster(2, wave, random.randint(1,10)==1, Images),random.randint(15,30)*(i)])
-            elif n <= 90-wave:
-                Monsters.append([monster.Monster(3, wave, random.randint(1,10)==1, Images),random.randint(15,30)*(i)])
-            elif n <= 110-wave:
-                Monsters.append([monster.Monster(4, wave, random.randint(1,10)==1, Images),random.randint(15,30)*(i)])
-            elif n <= 130-wave:
-                Monsters.append([monster.Monster(5, wave, random.randint(1,10)==1, Images),random.randint(15,30)*(i)])
-            elif n <= 150-wave:
-                Monsters.append([monster.Monster(6, wave, random.randint(1,10)==1, Images),random.randint(15,30)*(i)])
-            elif n <= 175-wave:
-                Monsters.append([monster.Monster(7, wave, random.randint(1,100)==1, Images),random.randint(15,30)*(i)])
-            elif n <= 200-wave:
-                Monsters.append([monster.Monster(8, wave, random.randint(1,10)==1, Images),random.randint(15,30)*(i)])
-            elif n <= 225-wave: 
-                Monsters.append([monster.Monster(9, wave, random.randint(1,10)==1, Images),random.randint(15,30)*(i)])
-            elif n <= 300-wave:
-                Monsters.append([monster.Monster(10, wave, False, Images),random.randint(15,30)*i])
-    
-    return Monsters
 
 
 
@@ -285,6 +136,8 @@ class Start():
             pygame.draw.polygon(gameDisplay, (0, 150, 0), [(710, 500), (710, 560), (750, 530)], 0)
         if self.speed >= 2:
             pygame.draw.polygon(gameDisplay, (0, 150, 0), [(740, 500), (740, 560), (780, 530)], 0)
+        if self.speed == 0:
+            pygame.draw.polygon(gameDisplay, (0, 150, 0), [(710, 500), (710, 560), (750, 530)], 2)
 
     def update(self):
         self.draw()
@@ -304,18 +157,22 @@ class Start():
 
 class AutoPlay():
     def __init__(self):
-        self.x, self.y = 600, 490
-        self.width, self.height = 30, 30
+        self.x, self.y = 200, 150
+        self.width, self.height = 70, 70
         self.switch = False
         self.cooldown = 0
 
     def draw(self):
-        if self.switch:
-            color = (110, 80, 40)
-        else:
-            color = (140, 110, 70)
-        pygame.draw.rect(gameDisplay, color, (self.x, self.y, self.width, self.height), 0)
+       
+        pygame.draw.rect(gameDisplay, (140, 110, 70), (self.x, self.y, self.width, self.height), 0)
         pygame.draw.rect(gameDisplay, (110, 80, 40), (self.x, self.y, self.width, self.height), 3)
+        if self.switch:
+            pygame.draw.line(gameDisplay, (0, 200, 0), (self.x + 10, self.y + 10), (self.x + 45, self.y + 60), 5)
+            pygame.draw.line(gameDisplay, (0, 200, 0), (self.x + 45, self.y + 60), (self.x + 60, self.y + 40), 5)
+        else:
+            pygame.draw.line(gameDisplay, (100, 0, 0), (self.x + 10, self.y + 10), (self.x + 60, self.y + 60), 3)
+            pygame.draw.line(gameDisplay, (100, 0, 0), (self.x + 60, self.y + 10), (self.x + 10, self.y + 60), 3)
+ 
 
     def update(self):
         self.draw()
@@ -323,6 +180,69 @@ class AutoPlay():
         pos, pressed = pygame.mouse.get_pos(), pygame.mouse.get_pressed()
         if self.x <= pos[0] <= self.x + self.width and self.y <= pos[1] <= self.y + self.height and pressed[0] == 1 and self.cooldown == 0:
             self.switch = not self.switch
+            self.cooldown = 1
+
+        if pressed[0] != 1:
+            self.cooldown = 0
+
+class Settings():
+    def __init__(self):
+        self.x, self.y = 580, 510
+        self.width, self.height = 30, 30
+        self.switch = False
+        self.cooldown = 0
+        self.autoPlay = AutoPlay()
+
+    def draw(self):
+       
+        pygame.draw.rect(gameDisplay, (140, 110, 70), (self.x, self.y, self.width, self.height), 0)
+        pygame.draw.rect(gameDisplay, (110, 80, 40), (self.x, self.y, self.width, self.height), 3)
+    
+
+    def settingsLoad(self):
+
+        run = True
+        while run:
+            
+            #Getting the mouse cordinates
+            pos, pressed = pygame.mouse.get_pos(), pygame.mouse.get_pressed()
+
+            #Drawing the background of the settings window
+            pygame.draw.rect(gameDisplay, (160, 130, 90), (150, 100, 400, 300), 0)
+            pygame.draw.rect(gameDisplay, (110, 80, 40), (150, 100, 400, 300), 3)
+
+            #Drawing the exit button
+            pygame.draw.rect(gameDisplay, (150, 0, 0), (515, 85, 50, 50), 0)
+            pygame.draw.rect(gameDisplay, (100, 0, 0), (515, 85, 50, 50), 2)
+            pygame.draw.line(gameDisplay, (50, 0, 0), (520, 90), (560, 130), 3)
+            pygame.draw.line(gameDisplay, (50, 0, 0), (560, 90), (520, 130), 3)
+            if 515 <= pos[0] <= 565 and 85 <= pos[1] <= 135 and pressed[0] == 1:
+                run = False
+            
+            #The autoplay button
+            gameDisplay.blit(font_20.render("Autoplay", True, (0, 0, 0)), (195, 120))
+            self.autoPlay.update()
+
+            #Settings bar at the top
+            pygame.draw.rect(gameDisplay, (160, 130, 90), (300, 75, 100, 50), 0)
+            pygame.draw.rect(gameDisplay, (110, 80, 40), (300, 75, 100, 50), 3)
+            gameDisplay.blit(font_20.render("Settings", True, (0, 0, 0)), (310, 85))
+
+            for event in pygame.event.get():
+                if event.type == QUIT:
+                  pygame.quit()
+                  sys.exit()
+
+            pygame.display.flip()
+            fpsClock.tick(fps)
+
+
+    def update(self):
+        self.draw()
+
+        pos, pressed = pygame.mouse.get_pos(), pygame.mouse.get_pressed()
+        if self.x <= pos[0] <= self.x + self.width and self.y <= pos[1] <= self.y + self.height and pressed[0] == 1 and self.cooldown == 0:
+            self.settingsLoad()
             self.cooldown = 1
 
         if pressed[0] != 1:
@@ -337,13 +257,13 @@ def game_loop():
     selection = Selection()
     score = 0
     startButton = Start()
-    autoPlay = AutoPlay()
     Images = load_images("Images")
     abilityCooldown = False
+    settings = Settings()
 
     #Generating each of the waves
     wave = 1
-    Monsters = genEnemies(wave, Images)
+    Monsters = waves.genEnemies(wave, Images)
     
     game_run = True
     while game_run:
@@ -374,7 +294,7 @@ def game_loop():
                     Lives = monster[0].update(Lives, startButton.speed, gameDisplay)
                     if monster[0].duplicate:
                         monster[0].duplicate = False
-                        tempMonster = [monster.Monster(5,wave,monster[0].camo, Images),monster[1]-30]
+                        tempMonster = [monsters.Monster(5,wave,monster[0].camo, Images),monster[1]-30]
                         tempMonster[0].x, tempMonster[0].y = monster[0].x, monster[0].y
                         tempMonster[0].step = monster[0].step
                         tempMonster[0].cooldown = 5
@@ -384,11 +304,11 @@ def game_loop():
                         Monsters.append(tempMonster)
                     if len(monster[0].addMonster) != 0:
                         for i, mons in enumerate(monster[0].addMonster):
-                            tempMonster = [monster.Monster(mons,wave,monster[0].camo, Images),monster[1]-30*(i+1)]
+                            tempMonster = [monsters.Monster(mons,wave,monster[0].camo, Images),monster[1]-30*(i+1)]
                             tempMonster[0].x, tempMonster[0].y = monster[0].x, monster[0].y
                             tempMonster[0].step = monster[0].step
                             tempMonster[0].cooldown = 5
-                            tempMonster[0].hit = monster[0].hit
+                            te5mpMonster[0].hit = monster[0].hit
                             tempMonster[0].fire = monster[0].fire
                             tempMonster[0].speedModifier = monster[0].speedModifier
                             Monsters.append(tempMonster)
@@ -397,8 +317,8 @@ def game_loop():
         if len(Monsters) == 0:
             Cash += 100+wave+1
             wave += 1
-            Monsters = genEnemies(wave, Images)
-            if not autoPlay.switch:
+            Monsters = waves.genEnemies(wave, Images)
+            if not settings.autoPlay.switch:
                 startButton.speed = 0
             for j, row in enumerate(Board):
                 for i, tile in enumerate(row):
@@ -414,14 +334,17 @@ def game_loop():
             for i in range(2):
                 pygame.draw.rect(gameDisplay, (140, 90, 40), (660+i*100, 150+j*70, 60, 60), 0)
                 pygame.draw.rect(gameDisplay, (210, 180, 140), (660+i*100, 150+j*70, 60, 60), 3)
-                pygame.draw.rect(gameDisplay, ColorBoard[j][i], (660+i*100+10, 150+j*70+10, 40, 40), 0)
+                if j != 1 or i != 0:
+                    pygame.draw.rect(gameDisplay, ColorBoard[j][i], (660+i*100+10, 150+j*70+10, 40, 40), 0)
+                else:
+                    gameDisplay.blit(pygame.transform.scale(Images["Flamethrower"], (40, 60)), (660+i*100+10, 150+j*70))
 
         #Drawing Lives/Cash
         pygame.draw.rect(gameDisplay, (0, 200, 0), (660, 20, 20, 20), 0)
         pygame.draw.rect(gameDisplay, (200, 0, 0), (660, 60, 20, 20), 0)
-        gameDisplay.blit(font.render(str(Cash), True, (0, 0, 0)), (690, 16))
-        gameDisplay.blit(font.render(str(Lives), True, (0, 0, 0)), (690, 56))
-        gameDisplay.blit(font.render("Wave: " + str(wave), True, (0, 0, 0)), (660, 96))
+        gameDisplay.blit(font_20.render(str(Cash), True, (0, 0, 0)), (690, 16))
+        gameDisplay.blit(font_20.render(str(Lives), True, (0, 0, 0)), (690, 56))
+        gameDisplay.blit(font_20.render("Wave: " + str(wave), True, (0, 0, 0)), (660, 96))
 
         if Lives <= 0:
             game_run = False
@@ -478,8 +401,9 @@ def game_loop():
         #The start button
         startButton.update()
 
-        #The autoplay button
-        autoPlay.update()
+        #Updates the settings
+        gameDisplay.blit(font_15.render("Settings", True, (0, 0, 0)), (565, 490))
+        settings.update()
 
         #Updating all crates so their drawn on a higher level then towers
         for j, row in enumerate(Board):
@@ -557,7 +481,7 @@ def game_loop():
                 elif k == "Unleash Havoc":
                     gameDisplay.blit(pygame.transform.scale(Images["UnleashHavoc"],(30,30)),(15+55*count,435))
                     
-                gameDisplay.blit(font.render(str(v), True, (0, 0, 0)), (40+55*count, 450))
+                gameDisplay.blit(font_20.render(str(v), True, (0, 0, 0)), (40+55*count, 450))
 
                 
 
