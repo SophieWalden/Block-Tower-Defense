@@ -1300,7 +1300,7 @@ def game_loop():
 
     width, height = 16, 12
     Board = setup_Board([[0]*width for _ in range(height)])
-    Lives, Cash = 100, 750000
+    Lives, Cash = 100, 750
     selection = Selection()
     score = 0
     startButton = Start()
@@ -1309,7 +1309,7 @@ def game_loop():
     abilityCooldown = False
 
     #Generating each of the waves
-    wave = 200
+    wave = 1
     Monsters = genEnemies(wave)
     
     game_run = True
