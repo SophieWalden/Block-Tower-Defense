@@ -276,6 +276,7 @@ class Tower():
         self.glaiveSpeed = 5
         self.glaiveRings = 1
         self.Glaives = []
+        self.angle = 0
     
 
         self.description = [[["",0]]*4]*2
@@ -345,10 +346,12 @@ class Tower():
             self.seeking, self.bulletSpeed, self.camo, self.value, self.fire = False, 10, False, 800, False
             self.lead = False
 
-    def draw(self, gameDisplay):
+    def draw(self, gameDisplay, Images):
         pygame.draw.rect(gameDisplay, (0,150,0), (self.x-5, self.y-5, 40, 40), 0)
-        pygame.draw.rect(gameDisplay, self.color, (self.x, self.y, self.width, self.height),0)
-        
+        if self.rank != 3:
+            pygame.draw.rect(gameDisplay, self.color, (self.x, self.y, self.width, self.height),0)
+        else:
+            gameDisplay.blit(pygame.transform.rotate(pygame.transform.scale(Images["Flamethrower"], (self.width, self.height+20)), self.angle), (self.x, self.y))
     def attack(self, Monsters, speed, Board, Images, gameDisplay):
 
         #Display Range of tower:
@@ -408,8 +411,8 @@ class Tower():
                             else:
                                 for i in range(self.shotAmount):
                                     self.Projectiles.append(Projectile(self.x+int(self.width/2), self.y+int(self.height/2), angle-0.2*(int(self.shotAmount/2)-i), self.pierce, self.size, self.bulletSpeed,random.randint(0,1000000), self.rank, img[self.rank-1]))
-                        
-                        
+
+                        self.angle = -1*math.degrees(angle)+90
                         self.cooldown = 50
         else:
             self.cooldown -= 1*speed*self.speed*effect[0]
@@ -839,7 +842,7 @@ class Tower():
             self.buyCooldown -= 1
                 
     def update(self, Monsters, speed, cash, Board, Images, gameDisplay):
-        self.draw(gameDisplay)
+        self.draw(gameDisplay, Images)
         Monsters = self.attack(Monsters, speed, Board, Images, gameDisplay)
         self.upgrade(cash, gameDisplay)
 
