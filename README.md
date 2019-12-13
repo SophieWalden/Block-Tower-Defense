@@ -1,6 +1,6 @@
 # Block-Tower-Defense
-An Tower Defense game in the Alpha stages (V 0.4a1)
+An Tower Defense game in the Alpha stages (V 0.6a3)
 
-Currently: 6 Towers each with 8 upgrades, 6 Different monsters to defend the world from, and 25 Pre-programmed waves with an endless freeplay
+Currently: 8 Towers each with 8 upgrades, 10 Different monsters to defend the world from, and 25 Pre-programmed waves with an endless freeplay
 
 Just download the files and run main.py (Pygame required)
