@@ -420,16 +420,16 @@ class Tower():
                         #print("Self: ", (self.x, self.y), " Monster: ", (monster[0].x, monster[0].y), " ", math.atan2((monster[0].y-self.y),(monster[0].x-self.x)), angle)
                         if self.rank not in [1, 2, 3]:
                             if self.shotAmount == 1:
-                                self.Projectiles.append(Projectile(self.x+int(self.width/2)-math.cos(angle)*10, self.y-int(self.height/2)+math.sin(angle)*10, angle, self.pierce, self.size, self.bulletSpeed,random.randint(0,1000000), self.rank))
+                                self.Projectiles.append(Projectile(self.x+int(self.width/2), self.y-int(self.height/2), angle, self.pierce, self.size, self.bulletSpeed,random.randint(0,1000000), self.rank))
                             else:
                                 for i in range(self.shotAmount):
-                                    self.Projectiles.append(Projectile(self.x+int(self.width/2)-math.cos(angle)*10, self.y-int(self.height/2)+math.sin(angle)*10, angle-0.2*(int(self.shotAmount/2)-i), self.pierce, self.size, self.bulletSpeed,random.randint(0,1000000), self.rank))
+                                    self.Projectiles.append(Projectile(self.x+int(self.width/2), self.y-int(self.height/2), angle-0.2*(int(self.shotAmount/2)-i), self.pierce, self.size, self.bulletSpeed,random.randint(0,1000000), self.rank))
                         else:
                             if self.shotAmount == 1:
-                                self.Projectiles.append(Projectile(self.x+int(self.width/2)-math.cos(angle)*10, self.y-int(self.height/2)+math.sin(angle)*10, angle, self.pierce, self.size, self.bulletSpeed,random.randint(0,1000000), self.rank, img[self.rank-1]))
+                                self.Projectiles.append(Projectile(self.x+int(self.width/2), self.y-int(self.height/2), angle, self.pierce, self.size, self.bulletSpeed,random.randint(0,1000000), self.rank, img[self.rank-1]))
                             else:
                                 for i in range(self.shotAmount):
-                                    self.Projectiles.append(Projectile(self.x+int(self.width/2)-math.cos(angle)*10, self.y-int(self.height/2)+math.sin(angle)*10, angle-0.2*(int(self.shotAmount/2)-i), self.pierce, self.size, self.bulletSpeed,random.randint(0,1000000), self.rank, img[self.rank-1]))
+                                    self.Projectiles.append(Projectile(self.x+int(self.width/2), self.y-int(self.height/2), angle-0.2*(int(self.shotAmount/2)-i), self.pierce, self.size, self.bulletSpeed,random.randint(0,1000000), self.rank, img[self.rank-1]))
 
                         self.cooldown = 50
         else:
