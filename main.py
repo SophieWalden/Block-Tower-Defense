@@ -336,11 +336,13 @@ def game_loop():
             for i in range(2):
                 pygame.draw.rect(gameDisplay, (140, 90, 40), (660+i*100, 150+j*70, 60, 60), 0)
                 pygame.draw.rect(gameDisplay, (210, 180, 140), (660+i*100, 150+j*70, 60, 60), 3)
-                if (j != 1 or i != 0) and (j != 0 or i != 1):
+                if (j != 1 or i != 0) and (j != 0 or i != 1) and (j != 1 or i != 1):
                     pygame.draw.rect(gameDisplay, ColorBoard[j][i], (660+i*100+10, 150+j*70+10, 40, 40), 0)
-                elif j != 1 or i != 0:
+                elif j == 0 and i == 1:
                     gameDisplay.blit(pygame.transform.scale(Images["NinjaBase"], (30, 30)), (660+i*100+15, 150+j*70+20))
-                    gameDisplay.blit(pygame.transform.scale(Images["NinjaGun"], (30, 40)), (660+i*100+15, 150+j*70+5))   
+                    gameDisplay.blit(pygame.transform.scale(Images["NinjaGun"], (30, 40)), (660+i*100+15, 150+j*70+5))
+                elif j == 1 and i == 1:
+                    gameDisplay.blit(pygame.transform.scale(Images["IceTower"], (30, 30)), (660+i*100+15, 150+j*70+20))                  
                 else:
                     gameDisplay.blit(pygame.transform.scale(Images["Flamethrower"], (40, 60)), (660+i*100+10, 150+j*70))
 
