@@ -1,5 +1,6 @@
-import pygame, random, sys, math, os
+import pygame, random, sys, math, os, PIL
 from pygame.locals import *
+from PIL import Image
  
 pygame.init()
 
@@ -86,7 +87,9 @@ class Glaive():
 
 
     def movement(self, speed):
-        self.angle += 0.05*speed
+        if speed == 0:
+            speed = 1
+        self.angle -= 0.05*speed
         self.x, self.y = self.speed*math.cos(self.angle) + self.startPos[0], self.speed*math.sin(self.angle) + self.startPos[1]
 
         if (self.x, self.y) == (self.speed*math.cos(0) + self.startPos[0], self.speed*math.sin(0) + self.startPos[0]):
@@ -346,12 +349,27 @@ class Tower():
             self.seeking, self.bulletSpeed, self.camo, self.value, self.fire = False, 10, False, 800, False
             self.lead = False
 
-    def draw(self, gameDisplay, Images):
-        pygame.draw.rect(gameDisplay, (0,150,0), (self.x-5, self.y-5, 40, 40), 0)
-        if self.rank != 3:
+    def draw(self, gameDisplay, Images, speed):
+
+        if self.rank not in [2, 3, 4, 7]:
             pygame.draw.rect(gameDisplay, self.color, (self.x, self.y, self.width, self.height),0)
+        elif self.rank == 7:
+            gameDisplay.blit(pygame.transform.scale(Images["GlaiveBase"], (self.width, self.height)), (self.x, self.y))
+            img = pygame.transform.rotate(pygame.transform.scale(Images["GlaiveSpinner"], (self.width+10, self.height-10)), self.angle)
+            gameDisplay.blit(img, (self.x-int(img.get_rect().size[0]/2)+15, self.y-int(img.get_rect().size[1]/2)+15))
+            gameDisplay.blit(pygame.transform.scale(Images["GlaiveTop"], (10, 10)), (self.x+10, self.y+10))
+            if speed == 0:
+                speed = 1
+            self.angle -= 5*speed
+            self.angle %= 360
+        elif self.rank == 4:
+            gameDisplay.blit(pygame.transform.scale(Images["IceTower"], (self.width, self.height)), (self.x, self.y))
+        elif self.rank == 2:
+            gameDisplay.blit(pygame.transform.scale(Images["NinjaBase"], (self.width, self.height)), (self.x, self.y))
+            img = pygame.transform.rotate(pygame.transform.scale(Images["NinjaGun"], (self.width-10, self.height)), self.angle)
+            gameDisplay.blit(img, (self.x-int(img.get_rect().size[0]/2)+15, self.y-int(img.get_rect().size[1]/2)+10))
         else:
-            gameDisplay.blit(pygame.transform.rotate(pygame.transform.scale(Images["Flamethrower"], (self.width, self.height+20)), self.angle), (self.x, self.y))
+            gameDisplay.blit(pygame.transform.rotate(pygame.transform.scale(Images["Flamethrower"], (self.width-5, self.height+10)), self.angle), (self.x, self.y))
     def attack(self, Monsters, speed, Board, Images, gameDisplay):
 
         #Display Range of tower:
@@ -397,22 +415,22 @@ class Tower():
                     if not monster[0].camo or (monster[0].camo and self.camo):
 
                         angle = math.atan2((self.y-monster[0].y),(self.x-monster[0].x))
+                        self.angle = -1*math.degrees(angle)+90
                         
                         #print("Self: ", (self.x, self.y), " Monster: ", (monster[0].x, monster[0].y), " ", math.atan2((monster[0].y-self.y),(monster[0].x-self.x)), angle)
                         if self.rank not in [1, 2, 3]:
                             if self.shotAmount == 1:
-                                self.Projectiles.append(Projectile(self.x+int(self.width/2), self.y+int(self.height/2), angle, self.pierce, self.size, self.bulletSpeed,random.randint(0,1000000), self.rank))
+                                self.Projectiles.append(Projectile(self.x+int(self.width/2)-math.cos(angle)*10, self.y-int(self.height/2)+math.sin(angle)*10, angle, self.pierce, self.size, self.bulletSpeed,random.randint(0,1000000), self.rank))
                             else:
                                 for i in range(self.shotAmount):
-                                    self.Projectiles.append(Projectile(self.x+int(self.width/2), self.y+int(self.height/2), angle-0.2*(int(self.shotAmount/2)-i), self.pierce, self.size, self.bulletSpeed,random.randint(0,1000000), self.rank))
+                                    self.Projectiles.append(Projectile(self.x+int(self.width/2)-math.cos(angle)*10, self.y-int(self.height/2)+math.sin(angle)*10, angle-0.2*(int(self.shotAmount/2)-i), self.pierce, self.size, self.bulletSpeed,random.randint(0,1000000), self.rank))
                         else:
                             if self.shotAmount == 1:
-                                self.Projectiles.append(Projectile(self.x+int(self.width/2), self.y+int(self.height/2), angle, self.pierce, self.size, self.bulletSpeed,random.randint(0,1000000), self.rank, img[self.rank-1]))
+                                self.Projectiles.append(Projectile(self.x+int(self.width/2)-math.cos(angle)*10, self.y-int(self.height/2)+math.sin(angle)*10, angle, self.pierce, self.size, self.bulletSpeed,random.randint(0,1000000), self.rank, img[self.rank-1]))
                             else:
                                 for i in range(self.shotAmount):
-                                    self.Projectiles.append(Projectile(self.x+int(self.width/2), self.y+int(self.height/2), angle-0.2*(int(self.shotAmount/2)-i), self.pierce, self.size, self.bulletSpeed,random.randint(0,1000000), self.rank, img[self.rank-1]))
+                                    self.Projectiles.append(Projectile(self.x+int(self.width/2)-math.cos(angle)*10, self.y-int(self.height/2)+math.sin(angle)*10, angle-0.2*(int(self.shotAmount/2)-i), self.pierce, self.size, self.bulletSpeed,random.randint(0,1000000), self.rank, img[self.rank-1]))
 
-                        self.angle = -1*math.degrees(angle)+90
                         self.cooldown = 50
         else:
             self.cooldown -= 1*speed*self.speed*effect[0]
@@ -842,7 +860,7 @@ class Tower():
             self.buyCooldown -= 1
                 
     def update(self, Monsters, speed, cash, Board, Images, gameDisplay):
-        self.draw(gameDisplay, Images)
+        self.draw(gameDisplay, Images, speed)
         Monsters = self.attack(Monsters, speed, Board, Images, gameDisplay)
         self.upgrade(cash, gameDisplay)
 
