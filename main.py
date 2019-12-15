@@ -280,6 +280,8 @@ def game_loop():
                     Color = (0, 150, 0)
                 elif Board[j][i] == 1:
                     Color = (210, 180, 140)
+                else:
+                    Color = (0, 150, 0)
                 pygame.draw.rect(gameDisplay, Color, (i*40,j*40,40,40), 0)
                 pygame.draw.rect(gameDisplay, (0, 150, 0), (i*40, j*40, 40, 40), 1)
 
@@ -334,14 +336,17 @@ def game_loop():
             for i in range(2):
                 pygame.draw.rect(gameDisplay, (140, 90, 40), (660+i*100, 150+j*70, 60, 60), 0)
                 pygame.draw.rect(gameDisplay, (210, 180, 140), (660+i*100, 150+j*70, 60, 60), 3)
-                if j != 1 or i != 0:
+                if (j != 1 or i != 0) and (j != 0 or i != 1):
                     pygame.draw.rect(gameDisplay, ColorBoard[j][i], (660+i*100+10, 150+j*70+10, 40, 40), 0)
+                elif j != 1 or i != 0:
+                    gameDisplay.blit(pygame.transform.scale(Images["NinjaBase"], (30, 30)), (660+i*100+15, 150+j*70+20))
+                    gameDisplay.blit(pygame.transform.scale(Images["NinjaGun"], (30, 40)), (660+i*100+15, 150+j*70+5))   
                 else:
                     gameDisplay.blit(pygame.transform.scale(Images["Flamethrower"], (40, 60)), (660+i*100+10, 150+j*70))
 
         #Drawing Lives/Cash
-        pygame.draw.rect(gameDisplay, (0, 200, 0), (660, 20, 20, 20), 0)
-        pygame.draw.rect(gameDisplay, (200, 0, 0), (660, 60, 20, 20), 0)
+        gameDisplay.blit(pygame.transform.scale(Images["Heart"], (20, 20)), (660, 60))
+        gameDisplay.blit(pygame.transform.scale(Images["InstantMoney"], (20, 20)), (660, 20))
         gameDisplay.blit(font_20.render(str(Cash), True, (0, 0, 0)), (690, 16))
         gameDisplay.blit(font_20.render(str(Lives), True, (0, 0, 0)), (690, 56))
         gameDisplay.blit(font_20.render("Wave: " + str(wave), True, (0, 0, 0)), (660, 96))
@@ -394,7 +399,6 @@ def game_loop():
                     except Exception:
                         tile.selected = False
         
-
 
         Board, Cash = selection.update(Board, Cash)
 
