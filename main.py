@@ -1,4 +1,4 @@
-import pygame, random, sys, math, os, tower, waves, monsters
+import pygame, random, sys, math, os, tower, waves, monsters, mainMenu
 from pygame.locals import *
  
 pygame.init()
@@ -248,7 +248,7 @@ class Settings():
         if pressed[0] != 1:
             self.cooldown = 0
      
-def game_loop():
+def game_loop(load):
     """Main Function"""
 
     width, height = 16, 12
@@ -260,11 +260,82 @@ def game_loop():
     Images = load_images("Images")
     abilityCooldown = False
     settings = Settings()
+    cooldown = 100
 
     #Generating each of the waves
     wave = 1
+
+    #Loading your save file
+    if load:
+        file = open("SaveFile/saveFile.txt", "r")
+        data = file.readline().split("#")
+        if len(data) >= 197:
+            count = 0
+            #Loading all the tiles
+            for j, row in enumerate(Board):
+                    for i, tile in enumerate(row):
+                        if data[count] == "2":
+                            count += 1
+                            #Loading all variables for a tower
+                            Board[j][i] = tower.Tower(i*40+5, j*40+5, int(data[count]))
+                            Board[j][i].pops = int(data[count+1])
+                            Board[j][i].score = int(data[count+2])
+                            Board[j][i].pierce = int(data[count+3])
+                            Board[j][i].damage = int(data[count+4])
+                            Board[j][i].speed = float(data[count+5])
+                            Board[j][i].shotAmount = int(data[count+6])
+                            Board[j][i].size = int(data[count+7])
+                            Board[j][i].path = int(data[count+8])
+                            Board[j][i].seeking = data[count+9] == "True"
+                            Board[j][i].bulletSpeed = float(data[count+10])
+                            Board[j][i].camo = data[count+11] == "True"
+                            Board[j][i].dead = data[count+12] == "True"
+                            Board[j][i].fireDamage = int(data[count+13])
+                            Board[j][i].fireLength = float(data[count+14])
+                            Board[j][i].fireLasting = float(data[count+15])
+                            Board[j][i].Permaslow = data[count+16] == "True"
+                            Board[j][i].slowAmount = float(data[count+17])
+                            Board[j][i].ExplodeTime = float(data[count+18])
+                            Board[j][i].bombRange = int(data[count+19])
+                            Board[j][i].crateValue = int(data[count+20])
+                            Board[j][i].autoCollect = data[count+21] == "True"
+                            Board[j][i].expireTime = int(data[count+22])
+                            Board[j][i].glaiveCount = int(data[count+23])
+                            Board[j][i].glaiveSpeed = int(data[count+24])
+                            Board[j][i].glaiveRings = int(data[count+25])
+                            Board[j][i].selected = False
+                            count += 26
+
+
+                            #Loads all upgrades
+                            for h, item in enumerate(Board[j][i].upgrades):
+                                for g, subItem in enumerate(item):
+                                    Board[j][i].upgrades[h][g] = int(data[count])
+                                    count += 1
+                  
+                            Board[j][i].currentUpgrade = [int(data[count]), int(data[count+1])]
+                            count += 2
+
+                            for item in Board[j][i].ability:
+                                Board[j][i].ability.append([data[count], int(data[count+1]), int(data[count+2]), int(data[count+3])])
+                                count += 4
+
+                        else:
+                            Board[j][i] = int(data[count])
+                            count += 1
+
+            Cash = int(data[count])
+            Lives = int(data[count+1])
+            settings.autoPlay.switch = data[count+3] == "True"
+            score = int(data[count+2])
+            wave = int(data[count+4])
+            count += 5
+        else:
+            print("Invalid Save File")
+
+    #Generating the monsters
     Monsters = waves.genEnemies(wave, Images)
-    
+          
     game_run = True
     while game_run:
 
@@ -310,13 +381,15 @@ def game_loop():
                             tempMonster[0].x, tempMonster[0].y = monster[0].x, monster[0].y
                             tempMonster[0].step = monster[0].step
                             tempMonster[0].cooldown = 5
-                            te5mpMonster[0].hit = monster[0].hit
+                            tempMonster[0].hit = monster[0].hit
                             tempMonster[0].fire = monster[0].fire
                             tempMonster[0].speedModifier = monster[0].speedModifier
                             Monsters.append(tempMonster)
                     monster[0].addMonster = []
                                 
         if len(Monsters) == 0:
+
+            #Starting the new wave
             Cash += 100+wave+1
             wave += 1
             Monsters = waves.genEnemies(wave, Images)
@@ -328,6 +401,41 @@ def game_loop():
                         tile = int(tile)
                     except Exception:
                         tile.Projectiles = []
+
+            #Saving after a wave ends
+            data = ""
+            for j, row in enumerate(Board):
+                for i, tile in enumerate(row):
+                    stop = False
+                    try:
+                        tile = int(tile)
+                    except Exception:
+                        data += "2" + "#"
+                        for item in [tile.rank, tile.pops, tile.score, tile.pierce, tile.damage, tile.speed, tile.shotAmount, tile.size, tile.path, tile.seeking,
+                                     tile.bulletSpeed, tile.camo, tile.dead, tile.fireDamage, tile.fireLength, tile.fireLasting, tile.Permaslow, tile.slowAmount,
+                                     tile.ExplodeTime, tile.bombRange, tile.crateValue, tile.autoCollect, tile.expireTime, tile.glaiveCount, tile.glaiveSpeed,
+                                     tile.glaiveRings]:
+                            data += str(item) + "#"
+                        for item in tile.upgrades:
+                            for subItem in item:
+                                data += str(subItem) + "#"
+                        for item in tile.currentUpgrade:
+                            data += str(item) + "#"
+                        for ability in tile.ability:
+                            for item in ability:
+                                data += str(item) + "#"
+                        stop = True
+                    if not stop:
+                        data += str(tile) + "#"
+
+            data += str(Cash) + "#"
+            data += str(Lives) + "#"
+            data += str(score) + "#"
+            data += str(settings.autoPlay.switch) + "#"
+            data += str(wave) + "#"
+
+            file = open("SaveFile/saveFile.txt", "w")
+            file.write(data)
 
         #Making the selection bar
         pygame.draw.rect(gameDisplay, (130, 90, 50), (640, 0, 200, 580), 0)
@@ -521,12 +629,11 @@ def game_loop():
                 except Exception:
                     if tile.selected:
                         pygame.draw.circle(gameDisplay, (0, 0, 0, 125), (tile.x+int(tile.width/2), tile.y+int(tile.height/2)),int(tile.range), 2)
-
         
         pygame.display.flip()
         fpsClock.tick(fps)
 
     print("Score: " + str(score))
 
-
-game_loop()
+if __name__ == "__main__":
+    mainMenu.MainMenu()
