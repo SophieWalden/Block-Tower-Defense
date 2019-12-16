@@ -55,3 +55,7 @@ V 0.6a4:
 Added dollar and lives symbol
 Added in a base Ice sprite(but It'll probably be changed later)
 Added ninja tower sprite
+
+V 0.7a1:
+Added main menu!
+Also added the ability to save your game which happens automatically after every round
