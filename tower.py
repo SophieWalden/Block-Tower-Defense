@@ -418,23 +418,33 @@ class Tower():
                         monStep = monster[0].step
 
                         #Program loops based on how far away the enemy is
-                        dist = int(math.sqrt((self.y-monster[0].y)**2 + (self.x-monster[0].x)**2)/(self.bulletSpeed*speed))
-                        for i in range(dist-1):
-                            xCheck, yCheck = monster[0].checkpoints[monStep-1][0]*40, monster[0].checkpoints[monStep-1][1]*40
-                            if (monster[0].checkpoints[monStep][0]*40-monster[0].speed <= CalculatedPoint[0] <= monster[0].checkpoints[monStep][0]*40+monster[0].speed and
-                                monster[0].checkpoints[monStep][1]*40-monster[0].speed <= CalculatedPoint[1] <= monster[0].checkpoints[monStep][1]*40+monster[0].speed):
-                                CalculatedPoint[0], CalculatedPoint[1] = monster[0].checkpoints[monStep][0]*40, monster[0].checkpoints[monStep][1]*40
-                                monStep += 1
-                            #Move it towards it's next checkpoint
-                            if CalculatedPoint[0] < monster[0].checkpoints[monStep][0]*40:
-                                CalculatedPoint[0] += int(monster[0].speed*speed*monster[0].speedModifier[0])
-                            elif CalculatedPoint[0] > monster[0].checkpoints[monStep][0]*40:
-                                CalculatedPoint[0] -= int(monster[0].speed*speed*monster[0].speedModifier[0])
-                            elif CalculatedPoint[1] > monster[0].checkpoints[monStep][1]*40:
-                                CalculatedPoint[1] -= int(monster[0].speed*speed*monster[0].speedModifier[0])
-                            elif CalculatedPoint[1] < monster[0].checkpoints[monStep][1]*40:
-                                CalculatedPoint[1] += int(monster[0].speed*speed*monster[0].speedModifier[0])
+                        dist = 1
+                        if speed != 0:
+                            dist = int(math.sqrt((self.y-monster[0].y)**2 + (self.x-monster[0].x)**2)/(self.bulletSpeed*speed))
 
+                        #cancelling all errors given when monStep = 7, but it only allows monStep < 7
+                        #Pretty sure its a bug due to the amount of processing time it takes so it tries
+                        #To do it too fast
+                        for i in range(dist-1):
+                            try:
+                                if monStep <= len(monster[0].checkpoints)-1:
+                                    xCheck, yCheck = monster[0].checkpoints[monStep-1][0]*40, monster[0].checkpoints[monStep-1][1]*40
+                                    if (monster[0].checkpoints[monStep][0]*40-monster[0].speed <= CalculatedPoint[0] <= monster[0].checkpoints[monStep][0]*40+monster[0].speed and
+                                        monster[0].checkpoints[monStep][1]*40-monster[0].speed <= CalculatedPoint[1] <= monster[0].checkpoints[monStep][1]*40+monster[0].speed):
+                                        CalculatedPoint[0], CalculatedPoint[1] = monster[0].checkpoints[monStep][0]*40, monster[0].checkpoints[monStep][1]*40
+                                        monStep += 1
+                                    #Move it towards it's next checkpoint
+                                    if CalculatedPoint[0] < monster[0].checkpoints[monStep][0]*40:
+                                        CalculatedPoint[0] += int(monster[0].speed*speed*monster[0].speedModifier[0])
+                                    elif CalculatedPoint[0] > monster[0].checkpoints[monStep][0]*40:
+                                        CalculatedPoint[0] -= int(monster[0].speed*speed*monster[0].speedModifier[0])
+                                    elif CalculatedPoint[1] > monster[0].checkpoints[monStep][1]*40:
+                                        CalculatedPoint[1] -= int(monster[0].speed*speed*monster[0].speedModifier[0])
+                                    elif CalculatedPoint[1] < monster[0].checkpoints[monStep][1]*40:
+                                        CalculatedPoint[1] += int(monster[0].speed*speed*monster[0].speedModifier[0])
+                            except Exception:
+                                pass
+    
                             
                         angle = math.atan2((self.y-CalculatedPoint[1]),(self.x-CalculatedPoint[0]))
                         
