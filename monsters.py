@@ -12,7 +12,7 @@ class Monster():
         self.rank = rank
         self.x, self.y = -100, 200
         self.step = 0
-        speed = [2, 3, 4, 5, 6, 4, 3, 1, 2, 3]
+        speed = [1.5, 2, 2.5, 3, 3.5, 3, 2.5, 1.2, 2, 1.2]
         self.speed = speed[self.rank-1] * (1 + (0.01*(int(wave/50)+1)*wave))
         self.wave = wave
         self.height, self.width = 30, 30
@@ -29,7 +29,7 @@ class Monster():
         if self.rank == 9:
             self.health = 3
         elif self.rank == 10:
-            self.health = 50
+            self.health = 10
         self.addMonster = []
         #All checkpoints on the map
         self.checkpoints = [(6, 5), (6, 2), (3, 2), (3, 9), (13, 9), (13, 4), (17, 4)]
@@ -60,7 +60,7 @@ class Monster():
             self.rank = new_Rank
             Colors = [(200, 0, 0), (0, 0, 200), (0, 200, 0), (255, 255, 0), (255,105,180), (0, 0, 0), (50, 50, 50), (128, 0, 128), (0, 100, 0), (150, 150, 150)]
             self.color = Colors[self.rank-1]
-            speed = [2, 3, 4, 5, 6, 4, 3, 1, 2, 3]
+            speed = [1.5, 2, 2.5, 3, 3.5, 3, 2.5, 1.2, 2, 1.2]
             self.speed = speed[self.rank-1] * (1 + (0.01*(int(self.wave/50)+1)*self.wave))
             if self.rank == 9:
                 self.health = 3
