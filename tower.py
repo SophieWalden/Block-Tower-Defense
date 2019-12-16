@@ -1,6 +1,5 @@
-import pygame, random, sys, math, os, PIL
+import pygame, random, sys, math, os
 from pygame.locals import *
-from PIL import Image
  
 pygame.init()
 
