@@ -310,7 +310,7 @@ class Tower():
             self.descriptions =[[["Fast Freezing",100],["Ranged Ice",250],["Lead Destruction",600],["Frozen in Time", 6500]],
                                 [["Slow Monsters", 175],["Damaging Ice", 200],["Slowed For Life", 800],["The Artic", 3000]]]
             
-            self.pierce, self.damage, self.speed, self.range, self.size, self.shotAmount  = 1,0,0.5,65,10,0
+            self.pierce, self.damage, self.speed, self.range, self.size, self.shotAmount  = 1,1,0.5,65,10,0
             self.seeking, self.bulletSpeed, self.camo, self.value, self.fire = False, 10, False, 400, False
             self.lead = False
 
@@ -413,8 +413,34 @@ class Tower():
                 if math.sqrt((monster[0].x - self.x)**2 + (monster[0].y - self.y)**2) <= self.range and self.cooldown <= 0:
                     if not monster[0].camo or (monster[0].camo and self.camo):
 
-                        angle = math.atan2((self.y-monster[0].y),(self.x-monster[0].x))
+                        #Predicting where the monster will be in a certain amount of frames
+                        CalculatedPoint = [monster[0].x+int(monster[0].width/2), monster[0].y+int(monster[0].height/2)]
+                        monStep = monster[0].step
+
+                        #Program loops based on how far away the enemy is
+                        dist = int(math.sqrt((self.y-monster[0].y)**2 + (self.x-monster[0].x)**2)/(self.bulletSpeed*speed))
+                        for i in range(dist-1):
+                            xCheck, yCheck = monster[0].checkpoints[monStep-1][0]*40, monster[0].checkpoints[monStep-1][1]*40
+                            if (monster[0].checkpoints[monStep][0]*40-monster[0].speed <= CalculatedPoint[0] <= monster[0].checkpoints[monStep][0]*40+monster[0].speed and
+                                monster[0].checkpoints[monStep][1]*40-monster[0].speed <= CalculatedPoint[1] <= monster[0].checkpoints[monStep][1]*40+monster[0].speed):
+                                CalculatedPoint[0], CalculatedPoint[1] = monster[0].checkpoints[monStep][0]*40, monster[0].checkpoints[monStep][1]*40
+                                monStep += 1
+                            #Move it towards it's next checkpoint
+                            if CalculatedPoint[0] < monster[0].checkpoints[monStep][0]*40:
+                                CalculatedPoint[0] += int(monster[0].speed*speed*monster[0].speedModifier[0])
+                            elif CalculatedPoint[0] > monster[0].checkpoints[monStep][0]*40:
+                                CalculatedPoint[0] -= int(monster[0].speed*speed*monster[0].speedModifier[0])
+                            elif CalculatedPoint[1] > monster[0].checkpoints[monStep][1]*40:
+                                CalculatedPoint[1] -= int(monster[0].speed*speed*monster[0].speedModifier[0])
+                            elif CalculatedPoint[1] < monster[0].checkpoints[monStep][1]*40:
+                                CalculatedPoint[1] += int(monster[0].speed*speed*monster[0].speedModifier[0])
+
+                            
+                        angle = math.atan2((self.y-CalculatedPoint[1]),(self.x-CalculatedPoint[0]))
+                        
+                            
                         self.angle = -1*math.degrees(angle)+90
+                        
                         
                         #print("Self: ", (self.x, self.y), " Monster: ", (monster[0].x, monster[0].y), " ", math.atan2((monster[0].y-self.y),(monster[0].x-self.x)), angle)
                         if self.rank not in [1, 2, 3]:
@@ -453,7 +479,7 @@ class Tower():
                         self.pops += self.damage
                         self.score += self.damage
                         self.cash += self.damage 
-            self.cooldown = 50
+            self.cooldown = 75
 
         Tiles = []
         #Explosion Factory
