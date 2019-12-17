@@ -6,3 +6,6 @@ Currently: 8 Towers each with 8 upgrades, 10 Different monsters to defend the wo
 Just download the files and run main.py (Pygame required)
 
 V 0.7a2 Changes: Finally taught this towers how to aim! Also buffed the ice tower for early game.
+
+
+V 0.7a2 Highest Wave (Not set by me): 131
