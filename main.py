@@ -296,12 +296,12 @@ def game_loop(load):
                             Board[j][i].Permaslow = data[count+16] == "True"
                             Board[j][i].slowAmount = float(data[count+17])
                             Board[j][i].ExplodeTime = float(data[count+18])
-                            Board[j][i].bombRange = int(data[count+19])
+                            Board[j][i].bombRange = float(data[count+19])
                             Board[j][i].crateValue = int(data[count+20])
                             Board[j][i].autoCollect = data[count+21] == "True"
                             Board[j][i].expireTime = int(data[count+22])
                             Board[j][i].glaiveCount = int(data[count+23])
-                            Board[j][i].glaiveSpeed = int(data[count+24])
+                            Board[j][i].glaiveSpeed = float(data[count+24])
                             Board[j][i].glaiveRings = int(data[count+25])
                             Board[j][i].selected = False
                             Board[j][i].value = int(data[count+26])
