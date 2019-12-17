@@ -301,10 +301,11 @@ def game_loop(load):
                             Board[j][i].autoCollect = data[count+21] == "True"
                             Board[j][i].expireTime = int(data[count+22])
                             Board[j][i].glaiveCount = int(data[count+23])
-                            Board[j][i].glaiveSpeed = float(data[count+24])
+                            Board[j][i].glaiveSpeed = int(data[count+24])
                             Board[j][i].glaiveRings = int(data[count+25])
                             Board[j][i].selected = False
-                            count += 26
+                            Board[j][i].value = int(data[count+26])
+                            count += 27
 
 
                             #Loads all upgrades
@@ -414,7 +415,7 @@ def game_loop(load):
                         for item in [tile.rank, tile.pops, tile.score, tile.pierce, tile.damage, tile.speed, tile.shotAmount, tile.size, tile.path, tile.seeking,
                                      tile.bulletSpeed, tile.camo, tile.dead, tile.fireDamage, tile.fireLength, tile.fireLasting, tile.Permaslow, tile.slowAmount,
                                      tile.ExplodeTime, tile.bombRange, tile.crateValue, tile.autoCollect, tile.expireTime, tile.glaiveCount, tile.glaiveSpeed,
-                                     tile.glaiveRings]:
+                                     tile.glaiveRings, tile.value]:
                             data += str(item) + "#"
                         for item in tile.upgrades:
                             for subItem in item:
