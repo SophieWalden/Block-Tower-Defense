@@ -1,4 +1,4 @@
-import monsters
+import monsters, random
 def genEnemies(wave, Images):
     """Outputs a list of all enemies based on a certain wave"""
     Monsters = []
