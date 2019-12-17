@@ -301,7 +301,7 @@ def game_loop(load):
                             Board[j][i].autoCollect = data[count+21] == "True"
                             Board[j][i].expireTime = int(data[count+22])
                             Board[j][i].glaiveCount = int(data[count+23])
-                            Board[j][i].glaiveSpeed = int(data[count+24])
+                            Board[j][i].glaiveSpeed = float(data[count+24])
                             Board[j][i].glaiveRings = int(data[count+25])
                             Board[j][i].selected = False
                             count += 26
