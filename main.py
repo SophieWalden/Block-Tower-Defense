@@ -15,13 +15,7 @@ font_15 = pygame.font.Font("IBMPlexSans-Regular.ttf", 15)
 # TODO List:
 #
 # Towers:
-# Ninja Tower (Detects Camo) (Finished)
-# Flamethrower (Pops Lead) (Finished)
-# Ice Tower (Slows/Pops Lead) (Finished)
-# Explosion Factory (Pops Lead/Aoe Damage) (Finished)
-# Money Tower (Generates Money) (Working On)
-# Glaive Tower
-# Super Tower
+# Bomb tower?
 #
 # Bloons:
 # Lead Bloons (Finished)
@@ -29,8 +23,8 @@ font_15 = pygame.font.Font("IBMPlexSans-Regular.ttf", 15)
 # Stronger Bloons (On going)
 #
 # Late Game Content:
-# Main Menu
-# Different Maps
+# Main Menu (Working on it)
+# Different Maps (Working on it)
 
 def load_images(path_to_directory):
     """Loads all images"""
@@ -43,23 +37,41 @@ def load_images(path_to_directory):
                 images[key] = img
     return images
     
-def setup_Board(board):
+def setup_Board(board, mapName):
     """Function used to setup the board with all path tiles"""
     #Making the pathing
-    for i in range(7):
-        board[5][i] = 1
-    for i in range(3):
-        board[2][i+3] = 1
-    for i in range(3):
-        board[4-i][6] = 1
-    for i in range(8):
-        board[2+i][3] = 1
-    for i in range(10):
-        board[9][4+i] = 1
-    for i in range(5):
-        board[8-i][13] = 1
-    for i in range(2):
-        board[4][14+i] = 1
+
+    if mapName == "Default":
+        for i in range(7):
+            board[5][i] = 1
+        for i in range(3):
+            board[2][i+3] = 1
+        for i in range(3):
+            board[4-i][6] = 1
+        for i in range(8):
+            board[2+i][3] = 1
+        for i in range(10):
+            board[9][4+i] = 1
+        for i in range(5):
+            board[8-i][13] = 1
+        for i in range(2):
+            board[4][14+i] = 1
+    elif mapName == "Twisty":
+        for i in range(10):
+            board[i][14] = 1
+        for i in range(13):
+            board[9][13-i] = 1
+        for i in range(8):
+            board[8-i][1] = 1
+        for i in range(10):
+            board[1][2+i] = 1
+        for i in range(5):
+            board[2+i][11] = 1
+        for i in range(7):
+            board[6][10-i] = 1
+        for i in range(6):
+            board[5-i][4] = 1
+        
 
     '''Print out all path tiles cord on the board
     for j, row in enumerate(board):
@@ -76,44 +88,124 @@ class Selection():
         self.selected = 0
         self.cooldown = 0
         self.bought = 0
-        self.Costs = [100, 200, 300, 400, 500, 600, 700, 800]
+        self.Costs = [100, 200, 300, 400, 500, 600, 700, 800, 300]
         self.names = ["Dart Tower", "Ninja Tower", "Flamethrower", "Ice Tower",
-                      "Explosion Factory", "Money Tower", "Glaive Tower", "Super Tower"]
+                      "Explosion Factory", "Money Tower", "Glaive Tower", "Super Tower", "Cannon Tower"]
+        self.selecting = False
+        self.step = 0
         
     
-    def update(self, board, cash):
+    def update(self, board, cash, Images, oldMode, Diff):
         pressed, pos = pygame.mouse.get_pressed(), pygame.mouse.get_pos()
         keys = pygame.key.get_pressed()
-
-        #Drawing the selection of towers
-        for j in range(4):
-            for i in range(2):
-                if 660+i*100 <= pos[0] <= 660+i*100+60 and 150+j*70 <= pos[1] <= 150+j*70+60 and pressed[0] == 1:
-                    self.selected = i+j*2+1
-                    self.cooldown = 20
-
-        #Displays costs of certain towers
-        if self.selected != 0:
-            gameDisplay.blit(font_20.render(str(self.names[self.selected-1]), True, (0, 0, 0)), (
-                740-int(font_20.size(str(self.names[self.selected-1]))[0]/2), 425))
-            gameDisplay.blit(font_20.render("Cost: " + str(self.Costs[self.selected-1]), True, (0, 0, 0)), (690, 450))
+        Multiplier = [0.8, 1, 1.2]
+        Difficulties = ["Easy", "Medium", "Hard"]
 
 
-        #Buying a new tower
-        if self.cooldown <= 0 and self.selected != 0 and 0 <= pos[0] <= 640 and 0 <= pos[1] <= 480 and pressed[0] == 1:
-            if board[int(pos[1]/40)][int(pos[0]/40)] == 0 and cash >= self.Costs[self.selected-1]:
-                board[int(pos[1]/40)][int(pos[0]/40)] = tower.Tower(int(pos[0]/40)*40+5, int(pos[1]/40)*40+5, self.selected)
-                board[int(pos[1]/40)][int(pos[0]/40)].selected = True
-                cash -= self.Costs[self.selected-1]
-                self.bought = 1
+        if not oldMode:
+            #Drawing the selection of towers
+            for j in range(4):
+                for i in range(2):
+                    if self.step == 0:
+                        if 660+i*100 <= pos[0] <= 660+i*100+60 and 150+j*70 <= pos[1] <= 150+j*70+60 and pressed[0] == 1 and self.selecting == False:
+                            self.selecting = True
+                            self.selected = i+j*2+1
+                            self.cooldown = 20
+                    else:
+                        if (i, j) == (0, 0):
+                            if 660+i*100 <= pos[0] <= 660+i*100+60 and 150+j*70 <= pos[1] <= 150+j*70+60 and pressed[0] == 1 and self.selecting == False:
+                                self.selecting = True
+                                self.selected = i+j*2+1+8
+                                self.cooldown = 20
+
+            #Displays costs of certain towers
+            if self.selected != 0:
+                gameDisplay.blit(font_20.render(str(self.names[self.selected-1]), True, (0, 0, 0)), (
+                    740-int(font_20.size(str(self.names[self.selected-1]))[0]/2), 425))
+                gameDisplay.blit(font_20.render("Cost: " + str(int(self.Costs[self.selected-1]*Multiplier[Difficulties.index(Diff)])), True, (0, 0, 0)), (690, 450))
+
+            if keys[303] != 1 and keys[304] != 1 and self.bought != 0:
+                self.selected = 0
+                self.bought = 0
+
+
+            if self.selecting == True and cash >= self.Costs[self.selected-1]*Multiplier[Difficulties.index(Diff)]:
+                if self.selected == 1:
+                    pygame.draw.rect(gameDisplay, (200, 0, 0), (pos[0]-15, pos[1]-15, 30, 30), 0)
+                elif self.selected == 2:
+                    gameDisplay.blit(pygame.transform.scale(Images["NinjaBase"], (30, 30)), (pos[0]-15, pos[1]-15))
+                    gameDisplay.blit(pygame.transform.scale(Images["NinjaGun"], (20, 30)), (pos[0]-10, pos[1]-20))
+                elif self.selected == 3:
+                    gameDisplay.blit(pygame.transform.scale(Images["Flamethrower"], (25, 35)), (pos[0]-15, pos[1]-15))
+                elif self.selected == 4:
+                    gameDisplay.blit(pygame.transform.scale(Images["IceTower"], (30, 30)), (pos[0]-15, pos[1]-15))
+                elif self.selected == 5:
+                    pygame.draw.rect(gameDisplay, (100, 100, 100), (pos[0]-15, pos[1]-15, 30, 30), 0)
+                elif self.selected == 6:
+                    pygame.draw.rect(gameDisplay, (0, 200, 0), (pos[0]-15, pos[1]-15, 30, 30), 0)
+                elif self.selected == 7:
+                    gameDisplay.blit(pygame.transform.scale(Images["GlaiveBase"], (30, 30)), (pos[0]-15, pos[1]-15))
+                    gameDisplay.blit(pygame.transform.scale(Images["GlaiveSpinner"], (40, 20)), (pos[0]-20, pos[1]-10))
+                    gameDisplay.blit(pygame.transform.scale(Images["GlaiveTop"], (10, 10)), (pos[0]-5, pos[1]-5))
+                elif self.selected == 8:
+                    pygame.draw.rect(gameDisplay, (100, 150, 200), (pos[0]-15, pos[1]-15, 30, 30), 0)
+                elif self.selected == 9:
+                    gameDisplay.blit(pygame.transform.scale(Images["Cannon"], (20, 30)), (pos[0]-15, pos[1]-15))
+                    
+            if self.selected != 0 and 0 <= pos[0] <= 640 and 0 <= pos[1] <= 480 and pressed[0] == 0 and self.selecting == True:
                 if keys[303] != 1 and keys[304] != 1:
-                    self.selected = 0
-        else:
-            self.cooldown -= 1
+                    self.selecting = False
+                if board[int(pos[1]/40)][int(pos[0]/40)] == 0 and cash >= self.Costs[self.selected-1]*Multiplier[Difficulties.index(Diff)]:
+                    board[int(pos[1]/40)][int(pos[0]/40)] = tower.Tower(int(pos[0]/40)*40+5, int(pos[1]/40)*40+5, self.selected, Diff)
+                    board[int(pos[1]/40)][int(pos[0]/40)].selected = True
+                    cash -= self.Costs[self.selected-1]*Multiplier[Difficulties.index(Diff)]
+                    self.bought = 1
+                    if keys[303] != 1 and keys[304] != 1:
+                        self.selected = 0
+            else:
+                self.cooldown -= 1
 
-        if keys[303] != 1 and keys[304] != 1 and self.bought != 0:
-            self.selected = 0
-            self.bought = 0
+            if pressed[0] == 0 and (keys[303] != 1 or keys[304] != 1):
+                self.selecting = False
+
+        else:
+            #Drawing the selection of towers
+            for j in range(4):
+                for i in range(2):
+                    if self.step == 0:
+                        if 660+i*100 <= pos[0] <= 660+i*100+60 and 150+j*70 <= pos[1] <= 150+j*70+60 and pressed[0] == 1 and self.selecting == False:
+                            self.selecting = True
+                            self.selected = i+j*2+1
+                            self.cooldown = 20
+                    else:
+                        if (i, j) == (0, 0):
+                            if 660+i*100 <= pos[0] <= 660+i*100+60 and 150+j*70 <= pos[1] <= 150+j*70+60 and pressed[0] == 1 and self.selecting == False:
+                                self.selecting = True
+                                self.selected = i+j*2+1+8
+                                self.cooldown = 20
+
+            #Displays costs of certain towers
+            if self.selected != 0:
+                gameDisplay.blit(font_20.render(str(self.names[self.selected-1]), True, (0, 0, 0)), (
+                    740-int(font_20.size(str(self.names[self.selected-1]))[0]/2), 425))
+                gameDisplay.blit(font_20.render("Cost: " + str(self.Costs[self.selected-1]), True, (0, 0, 0)), (690, 450))
+
+
+            #Buying a new tower
+            if self.cooldown <= 0 and self.selected != 0 and 0 <= pos[0] <= 640 and 0 <= pos[1] <= 480 and pressed[0] == 1:
+                if board[int(pos[1]/40)][int(pos[0]/40)] == 0 and cash >= self.Costs[self.selected-1]:
+                    board[int(pos[1]/40)][int(pos[0]/40)] = tower.Tower(int(pos[0]/40)*40+5, int(pos[1]/40)*40+5, self.selected)
+                    board[int(pos[1]/40)][int(pos[0]/40)].selected = True
+                    cash -= self.Costs[self.selected-1]
+                    self.bought = 1
+                    if keys[303] != 1 and keys[304] != 1:
+                        self.selected = 0
+            else:
+                self.cooldown -= 1
+
+            if keys[303] != 1 and keys[304] != 1 and self.bought != 0:
+                self.selected = 0
+                self.bought = 0
 
         return board, cash
     
@@ -190,8 +282,9 @@ class Settings():
         self.x, self.y = 580, 510
         self.width, self.height = 30, 30
         self.switch = False
-        self.cooldown = 0
+        self.cooldown = False
         self.autoPlay = AutoPlay()
+        self.oldMode = False
 
     def draw(self):
        
@@ -223,6 +316,25 @@ class Settings():
             gameDisplay.blit(font_20.render("Autoplay", True, (0, 0, 0)), (195, 120))
             self.autoPlay.update()
 
+
+            #Drawing the pick and place button
+            gameDisplay.blit(font_20.render("Pick and Place", True, (0, 0, 0)), (280, 120))
+            pygame.draw.rect(gameDisplay, (140, 110, 70), (300, 150, 70, 70), 0)
+            pygame.draw.rect(gameDisplay, (110, 80, 40), (300, 150, 70, 70), 3)
+            if self.oldMode:
+                pygame.draw.line(gameDisplay, (0, 200, 0), (300 + 10, 150 + 10), (300 + 45, 150 + 60), 5)
+                pygame.draw.line(gameDisplay, (0, 200, 0), (300 + 45, 150 + 60), (300 + 60, 150 + 40), 5)
+            else:
+                pygame.draw.line(gameDisplay, (100, 0, 0), (300 + 10, 150 + 10), (300 + 60, 150 + 60), 3)
+                pygame.draw.line(gameDisplay, (100, 0, 0), (300 + 60, 150 + 10), (300 + 10, 150 + 60), 3)
+
+            if 300 <= pos[0] <= 370 and 150 <= pos[1] <= 220 and pressed[0] == 1 and not self.cooldown:
+                self.cooldown = True
+                self.oldMode = not self.oldMode
+
+            if pressed[0] == 0:
+                self.cooldown = False
+
             #Settings bar at the top
             pygame.draw.rect(gameDisplay, (160, 130, 90), (300, 75, 100, 50), 0)
             pygame.draw.rect(gameDisplay, (110, 80, 40), (300, 75, 100, 50), 3)
@@ -248,11 +360,12 @@ class Settings():
         if pressed[0] != 1:
             self.cooldown = 0
      
-def game_loop(load):
+def game_loop(load, mapName, Diff=""):
     """Main Function"""
 
     width, height = 16, 12
-    Board = setup_Board([[0]*width for _ in range(height)])
+
+    Board = setup_Board([[0]*width for _ in range(height)], mapName)
     Lives, Cash = 100, 750
     selection = Selection()
     score = 0
@@ -262,22 +375,33 @@ def game_loop(load):
     settings = Settings()
     cooldown = 100
 
+    if Diff != "":
+        Difficulties = ["Easy", "Medium", "Hard"]
+        for i in range(2-Difficulties.index(Diff)):
+            Lives += 50
+
     #Generating each of the waves
     wave = 1
 
     #Loading your save file
     if load:
-        file = open("SaveFile/saveFile.txt", "r")
+        if mapName == "Default":
+            file = open("SaveFile/Classic.txt", "r")
+        elif mapName == "Twisty":
+            file = open("SaveFile/TwistyTowers.txt", "r")
         data = file.readline().split("#")
-        if len(data) >= 197:
+        try:
             count = 0
+            wave = int(data[count])
+            Diff = str(data[count+1])
+            count += 2
             #Loading all the tiles
             for j, row in enumerate(Board):
                     for i, tile in enumerate(row):
                         if data[count] == "2":
                             count += 1
                             #Loading all variables for a tower
-                            Board[j][i] = tower.Tower(i*40+5, j*40+5, int(data[count]))
+                            Board[j][i] = tower.Tower(i*40+5, j*40+5, int(data[count]), Diff)
                             Board[j][i].pops = int(data[count+1])
                             Board[j][i].score = int(data[count+2])
                             Board[j][i].pierce = int(data[count+3])
@@ -318,9 +442,6 @@ def game_loop(load):
                             Board[j][i].currentUpgrade = [int(data[count]), int(data[count+1])]
                             count += 2
 
-                            for item in Board[j][i].ability:
-                                Board[j][i].ability.append([data[count], int(data[count+1]), int(data[count+2]), int(data[count+3])])
-                                count += 4
 
                         else:
                             Board[j][i] = int(data[count])
@@ -330,13 +451,15 @@ def game_loop(load):
             Lives = int(data[count+1])
             settings.autoPlay.switch = data[count+3] == "True"
             score = int(data[count+2])
-            wave = int(data[count+4])
-            count += 5
-        else:
+            count += 4
+        except Exception:
             print("Invalid Save File")
 
+    if Diff == "":
+        Diff = "Medium"
+
     #Generating the monsters
-    Monsters = waves.genEnemies(wave, Images)
+    Monsters = waves.genEnemies(wave, Images, mapName)
           
     game_run = True
     while game_run:
@@ -369,7 +492,7 @@ def game_loop(load):
                     Lives = monster[0].update(Lives, startButton.speed, gameDisplay)
                     if monster[0].duplicate:
                         monster[0].duplicate = False
-                        tempMonster = [monsters.Monster(5,wave,monster[0].camo, Images),monster[1]-30]
+                        tempMonster = [monsters.Monster(5,wave,monster[0].camo, Images, mapName),monster[1]-30]
                         tempMonster[0].x, tempMonster[0].y = monster[0].x, monster[0].y
                         tempMonster[0].step = monster[0].step
                         tempMonster[0].cooldown = 5
@@ -379,7 +502,7 @@ def game_loop(load):
                         Monsters.append(tempMonster)
                     if len(monster[0].addMonster) != 0:
                         for i, mons in enumerate(monster[0].addMonster):
-                            tempMonster = [monsters.Monster(mons,wave,monster[0].camo, Images),monster[1]-30*(i+1)]
+                            tempMonster = [monsters.Monster(mons,wave,monster[0].camo, Images, mapName),monster[1]-30*(i+1)]
                             tempMonster[0].x, tempMonster[0].y = monster[0].x, monster[0].y
                             tempMonster[0].step = monster[0].step
                             tempMonster[0].cooldown = 5
@@ -394,7 +517,7 @@ def game_loop(load):
             #Starting the new wave
             Cash += 100+wave+1
             wave += 1
-            Monsters = waves.genEnemies(wave, Images)
+            Monsters = waves.genEnemies(wave, Images, mapName)
             if not settings.autoPlay.switch:
                 startButton.speed = 0
             for j, row in enumerate(Board):
@@ -406,6 +529,8 @@ def game_loop(load):
 
             #Saving after a wave ends
             data = ""
+            data += str(wave) + "#"
+            data += str(Diff) + "#"
             for j, row in enumerate(Board):
                 for i, tile in enumerate(row):
                     stop = False
@@ -423,45 +548,83 @@ def game_loop(load):
                                 data += str(subItem) + "#"
                         for item in tile.currentUpgrade:
                             data += str(item) + "#"
-                        for ability in tile.ability:
-                            for item in ability:
-                                data += str(item) + "#"
                         stop = True
                     if not stop:
                         data += str(tile) + "#"
 
-            data += str(Cash) + "#"
+            data += str(int(Cash)) + "#"
             data += str(Lives) + "#"
             data += str(score) + "#"
             data += str(settings.autoPlay.switch) + "#"
-            data += str(wave) + "#"
+
+            if mapName == "Default":
+                file = open("SaveFile/Classic.txt", "w")
+            elif mapName == "Twisty":
+                file = open("SaveFile/TwistyTowers.txt", "w")
+            file.write(data)
+
+            file = open("SaveFile/saveFile.txt", "r")
+            data = file.readline().split("#")
+            if len(data) != 4:
+                data = ["0", "Medium", "0", "Medium"]            
+                
+            if mapName == "Default":
+                data[0] = str(wave)
+                data[1] = str(Diff)
+            if mapName == "Twisty":
+                data[2] = str(wave)
+                data[3] = str(Diff)
 
             file = open("SaveFile/saveFile.txt", "w")
-            file.write(data)
+            file.write("#".join(data))
+            
 
         #Making the selection bar
         pygame.draw.rect(gameDisplay, (130, 90, 50), (640, 0, 200, 580), 0)
         ColorBoard = [[(200, 0, 0), (0, 0, 200)], [(200, 200, 0), (0, 200, 200)], [(100, 100, 100), (0, 200, 0)], [(200, 200, 200), (100, 150, 200)]]
+        if selection.step == 0:
+            pygame.draw.rect(gameDisplay, (140, 90, 40), (760, 110, 50, 30), 0)
+            pygame.draw.rect(gameDisplay, (210, 180, 140), (760, 110, 50, 30), 2)
+            pygame.draw.polygon(gameDisplay, (0, 150, 0), [(780, 115), (780, 135), (800, 125)], 0)
+            if 760 <= pos[0] <= 810 and 110 <= pos[1] <= 140 and pressed[0] == 1:
+                selection.step = 1
+        elif selection.step == 1:
+            pygame.draw.rect(gameDisplay, (140, 90, 40), (670, 110, 50, 30), 0)
+            pygame.draw.rect(gameDisplay, (210, 180, 140), (670, 110, 50, 30), 2)
+            pygame.draw.polygon(gameDisplay, (0, 150, 0), [(700, 115), (700, 135), (680, 125)], 0)
+            if 670 <= pos[0] <= 720 and 110 <= pos[1] <= 140 and pressed[0] == 1:
+                selection.step = 0
         for j in range(4):
             for i in range(2):
-                pygame.draw.rect(gameDisplay, (140, 90, 40), (660+i*100, 150+j*70, 60, 60), 0)
-                pygame.draw.rect(gameDisplay, (210, 180, 140), (660+i*100, 150+j*70, 60, 60), 3)
-                if (j != 1 or i != 0) and (j != 0 or i != 1) and (j != 1 or i != 1):
-                    pygame.draw.rect(gameDisplay, ColorBoard[j][i], (660+i*100+10, 150+j*70+10, 40, 40), 0)
-                elif j == 0 and i == 1:
-                    gameDisplay.blit(pygame.transform.scale(Images["NinjaBase"], (30, 30)), (660+i*100+15, 150+j*70+20))
-                    gameDisplay.blit(pygame.transform.scale(Images["NinjaGun"], (30, 40)), (660+i*100+15, 150+j*70+5))
-                elif j == 1 and i == 1:
-                    gameDisplay.blit(pygame.transform.scale(Images["IceTower"], (30, 30)), (660+i*100+15, 150+j*70+20))                  
-                else:
-                    gameDisplay.blit(pygame.transform.scale(Images["Flamethrower"], (40, 60)), (660+i*100+10, 150+j*70))
+                if selection.step == 0:
+                    pygame.draw.rect(gameDisplay, (140, 90, 40), (660+i*100, 150+j*70, 60, 60), 0)
+                    pygame.draw.rect(gameDisplay, (210, 180, 140), (660+i*100, 150+j*70, 60, 60), 3)
+                    if [i, j] not in [[0, 1], [1, 0], [1, 1], [0, 3]]:
+                        pygame.draw.rect(gameDisplay, ColorBoard[j][i], (660+i*100+10, 150+j*70+10, 40, 40), 0)
+                    elif j == 0 and i == 1:
+                        gameDisplay.blit(pygame.transform.scale(Images["NinjaBase"], (30, 30)), (660+i*100+15, 150+j*70+20))
+                        gameDisplay.blit(pygame.transform.scale(Images["NinjaGun"], (30, 40)), (660+i*100+15, 150+j*70+5))
+                    elif j == 1 and i == 1:
+                        gameDisplay.blit(pygame.transform.scale(Images["IceTower"], (30, 30)), (660+i*100+15, 150+j*70+20))
+                    elif j == 3 and i == 0:
+                        gameDisplay.blit(pygame.transform.scale(Images["GlaiveBase"], (35, 35)), (660+i*100+12, 150+j*70+12))
+                        gameDisplay.blit(pygame.transform.scale(Images["GlaiveSpinner"], (45, 20)), (660+i*100+7, 150+j*70+10+10))
+                        gameDisplay.blit(pygame.transform.scale(Images["GlaiveTop"], (13, 13)), (660+i*100+10+13, 150+j*70+10+13))
+                    else:
+                        gameDisplay.blit(pygame.transform.scale(Images["Flamethrower"], (40, 60)), (660+i*100+10, 150+j*70))
+                elif selection.step == 1:
+                    if (i, j) == (0, 0):
+                        pygame.draw.rect(gameDisplay, (140, 90, 40), (660+i*100, 150+j*70, 60, 60), 0)
+                        pygame.draw.rect(gameDisplay, (210, 180, 140), (660+i*100, 150+j*70, 60, 60), 3)
+                        gameDisplay.blit(pygame.transform.scale(Images["Cannon"], (30, 45)), (660+i*100+15, 160+j*70))
 
+                    
         #Drawing Lives/Cash
-        gameDisplay.blit(pygame.transform.scale(Images["Heart"], (20, 20)), (660, 60))
-        gameDisplay.blit(pygame.transform.scale(Images["InstantMoney"], (20, 20)), (660, 20))
-        gameDisplay.blit(font_20.render(str(Cash), True, (0, 0, 0)), (690, 16))
-        gameDisplay.blit(font_20.render(str(Lives), True, (0, 0, 0)), (690, 56))
-        gameDisplay.blit(font_20.render("Wave: " + str(wave), True, (0, 0, 0)), (660, 96))
+        gameDisplay.blit(pygame.transform.scale(Images["Heart"], (20, 20)), (655, 50))
+        gameDisplay.blit(pygame.transform.scale(Images["InstantMoney"], (20, 20)), (655, 20))
+        gameDisplay.blit(font_20.render(str(int(Cash)), True, (0, 0, 0)), (680, 16))
+        gameDisplay.blit(font_20.render(str(Lives), True, (0, 0, 0)), (680, 45))
+        gameDisplay.blit(font_20.render("Wave: " + str(wave), True, (0, 0, 0)), (660, 70))
 
         if Lives <= 0:
             game_run = False
@@ -512,7 +675,7 @@ def game_loop(load):
                         tile.selected = False
         
 
-        Board, Cash = selection.update(Board, Cash)
+        Board, Cash = selection.update(Board, Cash, Images, settings.oldMode, Diff)
 
         #The start button
         startButton.update()
@@ -596,6 +759,8 @@ def game_loop(load):
                     gameDisplay.blit(pygame.transform.scale(Images["CompleteReform"],(30,30)),(15+55*count,435))
                 elif k == "Unleash Havoc":
                     gameDisplay.blit(pygame.transform.scale(Images["UnleashHavoc"],(30,30)),(15+55*count,435))
+                elif k == "Ballistic Nuke":
+                    gameDisplay.blit(pygame.transform.scale(Images["BallisticNuke"],(50,50)),(55*count,425))
                     
                 gameDisplay.blit(font_20.render(str(v), True, (0, 0, 0)), (40+55*count, 450))
 
