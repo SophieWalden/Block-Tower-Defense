@@ -354,7 +354,7 @@ class Tower():
                                 [["Bigger Range", int(800*self.multi)],["Biggest Range", int(1500*self.multi)],["Mini-Death", int(4000*self.multi)],["Unleash Havoc", int(26000*self.multi)]]]
             
             self.pierce, self.damage, self.speed, self.range, self.size, self.shotAmount  = 5,1, 3, 200, 10,1
-            self.seeking, self.bulletSpeed, self.camo, self.value, self.fire = False, 10, False, 800, False
+            self.seeking, self.bulletSpeed, self.camo, self.value, self.fire = False, 10, False, 1500, False
             self.lead = False
 
         elif rank == 9:
