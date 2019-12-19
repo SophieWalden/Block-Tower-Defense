@@ -88,7 +88,7 @@ class Selection():
         self.selected = 0
         self.cooldown = 0
         self.bought = 0
-        self.Costs = [100, 200, 300, 400, 500, 600, 700, 800, 300]
+        self.Costs = [100, 200, 300, 400, 500, 600, 700, 1500, 300]
         self.names = ["Dart Tower", "Ninja Tower", "Flamethrower", "Ice Tower",
                       "Explosion Factory", "Money Tower", "Glaive Tower", "Super Tower", "Cannon Tower"]
         self.selecting = False
