@@ -54,20 +54,11 @@ def MainMenu():
 
             pygame.draw.rect(gameDisplay, (150, 0, 0), (340, 320, 150, 75), 0)
             pygame.draw.rect(gameDisplay, (100, 0, 0), (340, 320, 150, 75), 2)
-            gameDisplay.blit(font_20.render("New Game", True, (0, 0, 0)), (365, 350))
+            gameDisplay.blit(font_20.render("Play", True, (0, 0, 0)), (395, 340))
             if 340 <= pos[0] <= 490 and 320 <= pos[1] <= 395 and pressed[0] == 1:
                 screen = "Map Select"
                 cooldown = True
 
-            pygame.draw.rect(gameDisplay, (150, 0, 0), (150, 320, 150, 75), 0)
-            pygame.draw.rect(gameDisplay, (100, 0, 0), (150, 320, 150, 75), 2)
-            gameDisplay.blit(font_20.render("Nothing Yet", True, (0, 0, 0)), (170, 350))
-            if 150 <= pos[0] <= 300 and 320 <= pos[1] <= 395 and pressed[0] == 1:
-                main.game_loop(True, "")
-
-            pygame.draw.rect(gameDisplay, (150, 0, 0), (530, 320, 150, 75), 0)
-            pygame.draw.rect(gameDisplay, (100, 0, 0), (530, 320, 150, 75), 2)
-            gameDisplay.blit(font_20.render("Nothing Yet", True, (0, 0, 0)), (550, 350))
 
         elif screen == "Map Select":
 
