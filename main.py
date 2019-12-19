@@ -366,7 +366,7 @@ def game_loop(load, mapName, Diff=""):
     width, height = 16, 12
 
     Board = setup_Board([[0]*width for _ in range(height)], mapName)
-    Lives, Cash = 100, 750
+    Lives, Cash = 100, 750000
     selection = Selection()
     score = 0
     startButton = Start()
@@ -760,7 +760,7 @@ def game_loop(load, mapName, Diff=""):
                 elif k == "Unleash Havoc":
                     gameDisplay.blit(pygame.transform.scale(Images["UnleashHavoc"],(30,30)),(15+55*count,435))
                 elif k == "Ballistic Nuke":
-                    gameDisplay.blit(pygame.transform.scale(Images["BallisticNuke"],(50,50)),(55*count,425))
+                    gameDisplay.blit(pygame.transform.scale(Images["BallisticNuke"],(35,35)),(55*count+13,432))
                     
                 gameDisplay.blit(font_20.render(str(v), True, (0, 0, 0)), (40+55*count, 450))
 
