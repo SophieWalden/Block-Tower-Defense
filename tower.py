@@ -77,12 +77,12 @@ class Glaive():
         self.rect.bottom = self.y + self.height
         self.rect.left = self.x
         self.rect.right = self.x + self.width
-        
 
 
     def draw(self, gameDisplay):
         #pygame.draw.rect(gameDisplay, (0, 0, 0), (self.x, self.y, self.width, self.height), 0)
-        gameDisplay.blit(pygame.transform.rotate(pygame.transform.scale(self.img, (self.width+5, self.height+5)), self.ang), (self.x, self.y))
+        img = pygame.transform.rotate(pygame.transform.scale(self.img, (self.width+5, self.height+5)), self.ang)
+        gameDisplay.blit(img, (self.x-img.get_rect().size[0]/2, self.y-img.get_rect().size[1]/2))
 
 
     def movement(self, speed):
@@ -198,6 +198,7 @@ class Projectile():
         self.img = img
         self.ang = 0
         self.rank = rank
+        self.exploding = False
         
         #Setting up the hitbox
         self.image = pygame.Surface([self.width, self.height])
@@ -216,6 +217,8 @@ class Projectile():
                 gameDisplay.blit(pygame.transform.rotate(pygame.transform.scale(self.img, (self.width+20, self.height+20)), self.ang), (self.x, self.y))
             elif self.rank in [1, 3]:
                 gameDisplay.blit(pygame.transform.rotate(pygame.transform.scale(self.img, (self.width+5+((self.rank-1)*5), self.height+10+((self.rank-1)*5))), -1*math.degrees(self.angle)+90), (self.x, self.y))
+            elif self.rank == 9:
+                gameDisplay.blit(pygame.transform.rotate(pygame.transform.scale(self.img, (self.width, self.height)), -1*math.degrees(self.angle)+90), (self.x, self.y))
         #pygame.draw.line(gameDisplay, (0, 0, 0), (self.x, self.y), (self.OldX, self.OldY), 5)
 
     def movement(self, speed):
@@ -234,11 +237,11 @@ class Projectile():
 
 class Tower():
     """Class which encapsulates  all towers visuals/mechanics"""
-    def __init__(self, x, y, rank):
+    def __init__(self, x, y, rank, Diff):
         self.x, self.y = x, y
         self.width, self.height = 30, 30
         self.rank = rank
-        Colors = [(200, 0, 0), (0, 0, 200), (200, 200, 0), (0, 200, 200), (100, 100, 100), (0, 200, 0), (200, 200, 200), (100, 150, 200)]
+        Colors = [(200, 0, 0), (0, 0, 200), (200, 200, 0), (0, 200, 200), (100, 100, 100), (0, 200, 0), (200, 200, 200), (100, 150, 200), (0, 0, 0)]
         self.color = Colors[self.rank-1]
         self.range = 100
         self.Projectiles = []
@@ -279,36 +282,40 @@ class Tower():
         self.glaiveRings = 1
         self.Glaives = []
         self.angle = 0
+        self.dif = Diff
+        Multiplier = [0.8, 1, 1.2]
+        Difficulties = ["Easy", "Medium", "Hard"]
+        self.multi = Multiplier[Difficulties.index(self.dif)]
     
 
         self.description = [[["",0]]*4]*2
         #Putting in all the distinct upgrades
         if rank == 1:
             #Dart Monkeys
-            self.descriptions =[[["Long Range Shot",100],["Extra Range Shot",200],["Double Damage",600],["Big Shot",2000]],
-                                [["Piercing Darts", 150],["Faster Tower", 300],["Triple Shot", 450],["Speed 4 Days", 3500]]]
+            self.descriptions =[[["Long Range Shot",int(100*self.multi)],["Extra Range Shot",int(200*self.multi)],["Double Damage",int(600*self.multi)],["Big Shot",int(2000*self.multi)]],
+                                [["Piercing Darts", int(150*self.multi)],["Faster Tower", int(300*self.multi)],["Triple Shot", int(450*self.multi)],["Speed 4 Days", int(3500*self.multi)]]]
 
             self.pierce, self.damage, self.speed, self.range, self.size, self.shotAmount, self.seeking, self.bulletSpeed, self.camo, self.value, self.fire = 1,1,1,100,10,1, False, 10, False, 100, False
             self.lead = False
         elif rank == 2:
             #Ninja Monkeys
-            self.descriptions =[[["Ninja Discipline",150],["Sharp Shruks",275],["Double Trouble",750],["Grandjitsu",2750]],
-                                [["Seeking Shruks", 150],["Small, but Deadly", 300],["Slow, but Poweful", 450],["Bullet Time", 4500]]]
+            self.descriptions =[[["Ninja Discipline",int(150*self.multi)],["Sharp Shruks",int(275*self.multi)],["Double Trouble",int(750*self.multi)],["Grandjitsu",int(2750*self.multi)]],
+                                [["Seeking Shruks", int(150*self.multi)],["Small, but Deadly", int(300*self.multi)],["Slow, but Poweful", int(450*self.multi)],["Bullet Time", int(4500*self.multi)]]]
 
             self.pierce, self.damage, self.speed, self.range, self.size, self.shotAmount, self.seeking, self.bulletSpeed, self.camo, self.value, self.fire  = 1,1,1,100,10,1, False, 10, True, 200, False
             self.lead = False
         elif rank == 3:
             #Flamethrower
-            self.descriptions =[[["Ranged Flames",100],["Faster Flames",250],["Damaging Fire",600],["Tracking Fire", 6500]],
-                                [["Long Lasting Fire", 175],["Extra Fire", 200],["Fire for all", 800],["Forest Fire", 3000]]]
+            self.descriptions =[[["Ranged Flames",int(100*self.multi)],["Faster Flames",int(250*self.multi)],["Damaging Fire",int(600*self.multi)],["Tracking Fire", int(6500*self.multi)]],
+                                [["Long Lasting Fire", int(175*self.multi)],["Extra Fire", int(200*self.multi)],["Fire for all", int(800*self.multi)],["Forest Fire", int(3000*self.multi)]]]
             
             self.pierce, self.damage, self.speed, self.range, self.size, self.shotAmount, self.seeking, self.bulletSpeed, self.camo, self.value, self.fire  = 1,0,0.5,50,15,1, False, 10, True, 300, True
             self.lead = True
 
         elif rank == 4:
             #Ice Tower
-            self.descriptions =[[["Fast Freezing",100],["Ranged Ice",250],["Lead Destruction",600],["Frozen in Time", 6500]],
-                                [["Slow Monsters", 175],["Damaging Ice", 200],["Slowed For Life", 800],["The Artic", 3000]]]
+            self.descriptions =[[["Fast Freezing",int(100*self.multi)],["Ranged Ice",int(250*self.multi)],["Lead Destruction",int(600*self.multi)],["Frozen in Time", int(6500*self.multi)]],
+                                [["Slow Monsters", int(175*self.multi)],["Damaging Ice", int(200*self.multi)],["Slowed For Life", int(800*self.multi)],["The Artic", int(3000*self.multi)]]]
             
             self.pierce, self.damage, self.speed, self.range, self.size, self.shotAmount  = 1,1,0.5,65,10,0
             self.seeking, self.bulletSpeed, self.camo, self.value, self.fire = False, 10, False, 400, False
@@ -316,8 +323,8 @@ class Tower():
 
         elif rank == 5:
             #Explosion Factory Tower
-            self.descriptions =[[["Fast Production",300],["Faster Production",550],["Damage 4 Days",1000],["Ballistic", 10000]],
-                                [["Big Bombs", 175],["Extra Range", 200],["Slow Explode", 800],["Smoke Bomb", 4500]]]
+            self.descriptions =[[["Fast Production",int(300*self.multi)],["Faster Production",int(550*self.multi)],["Damage 4 Days",int(1000*self.multi)],["Ballistic", int(10000*self.multi)]],
+                                [["Big Bombs", int(175*self.multi)],["Extra Range", int(200*self.multi)],["Slow Explode", int(800*self.multi)],["Smoke Bomb", int(4500*self.multi)]]]
             
             self.pierce, self.damage, self.speed, self.range, self.size, self.shotAmount  = 1,1,0.5,65,10,0
             self.seeking, self.bulletSpeed, self.camo, self.value, self.fire = False, 10, False, 500, False
@@ -325,32 +332,43 @@ class Tower():
 
         elif rank == 6:
             #Money Tower
-            self.descriptions =[[["Big Stacks",545],["Bigger Stacks",900],["Money Plantation",2500],["Enterprise", 23500]],
-                                [["Long-lasting", 175],["Valued Output", 800],["AutoCollect", 1500],["Fast Money", 4500]]]
+            self.descriptions =[[["Big Stacks",int(545*self.multi)],["Bigger Stacks",int(900*self.multi)],["Money Plantation",int(2500*self.multi)],["Enterprise", int(23500*self.multi)]],
+                                [["Long-lasting", int(175*self.multi)],["Valued Output", int(800*self.multi)],["AutoCollect", int(1500*self.multi)],["Fast Money", int(4500*self.multi)]]]
             
             self.pierce, self.damage, self.speed, self.range, self.size, self.shotAmount  = 0,0, 0.1, 100, 0,0
             self.seeking, self.bulletSpeed, self.camo, self.value, self.fire = False, 0, False, 600, False
             self.lead = False
 
         elif rank == 7:
-            self.descriptions =[[["Faster Faster",545],["Double Glaives",900],["QUADRA GLAVES",3500],["Gyro Glaves", 30000]],
-                                [["Sonic?", 455],["Damaging Glaves", 800],["Double Ringed Glaives", 1500],["Complete Reform", 50000]]]
+            #Glaive Tower
+            self.descriptions =[[["Faster Faster",int(545*self.multi)],["Double Glaives",int(900*self.multi)],["QUADRA GLAVES",int(3500*self.multi)],["Gyro Glaves", int(30000*self.multi)]],
+                                [["Sonic?", int(455*self.multi)],["Damaging Glaves", int(800*self.multi)],["Double Ringed Glaives", int(1500*self.multi)],["Complete Reform", int(50000*self.multi)]]]
             
             self.pierce, self.damage, self.speed, self.range, self.size, self.shotAmount  = 0,1, 0.1, 100, 0,0
             self.seeking, self.bulletSpeed, self.camo, self.value, self.fire = False, 0, False, 700, False
             self.lead = False
 
         elif rank == 8:
-            self.descriptions =[[["Firen Ma Lazar",1500],["Thick Lazer",2500],["Double Lazer?",50000],["Unbeatable", 100000]],
-                                [["Bigger Range", 800],["Biggest Range", 1500],["Mini-Death", 9000],["Unleash Havoc", 26000]]]
+            #Super Tower
+            self.descriptions =[[["Firen Ma Lazar",int(1500*self.multi)],["Thick Lazer",int(2500*self.multi)],["Double Lazer?",int(5000*self.multi)],["Unbeatable", int(36000*self.multi)]],
+                                [["Bigger Range", int(800*self.multi)],["Biggest Range", int(1500*self.multi)],["Mini-Death", int(4000*self.multi)],["Unleash Havoc", int(26000*self.multi)]]]
             
             self.pierce, self.damage, self.speed, self.range, self.size, self.shotAmount  = 5,1, 3, 200, 10,1
             self.seeking, self.bulletSpeed, self.camo, self.value, self.fire = False, 10, False, 800, False
             self.lead = False
 
+        elif rank == 9:
+            #Cannon Tower
+            self.descriptions =[[["Bigger Bombs",int(400*self.multi)],["Quicker Shots",int(550*self.multi)],["Charged Shot",int(1350*self.multi)],["Nuke Bullets", int(2500*self.multi)]],
+                                [["Damaging Bombs", int(200*self.multi)],["Ranged Explosion", int(500*self.multi)],["Double Shot", int(1750*self.multi)],["Ballistic Nuke", int(5000*self.multi)]]]
+            
+            self.pierce, self.damage, self.speed, self.range, self.size, self.shotAmount  = 1, 1, 0.5, 100, 20, 1
+            self.seeking, self.bulletSpeed, self.camo, self.value, self.fire = False, 5, False, 400, False
+            self.lead = True
+            
     def draw(self, gameDisplay, Images, speed):
 
-        if self.rank not in [2, 3, 4, 7]:
+        if self.rank not in [2, 3, 4, 7, 9]:
             pygame.draw.rect(gameDisplay, self.color, (self.x, self.y, self.width, self.height),0)
         elif self.rank == 7:
             gameDisplay.blit(pygame.transform.scale(Images["GlaiveBase"], (self.width, self.height)), (self.x, self.y))
@@ -366,6 +384,9 @@ class Tower():
         elif self.rank == 2:
             gameDisplay.blit(pygame.transform.scale(Images["NinjaBase"], (self.width, self.height)), (self.x, self.y))
             img = pygame.transform.rotate(pygame.transform.scale(Images["NinjaGun"], (self.width-10, self.height)), self.angle)
+            gameDisplay.blit(img, (self.x-int(img.get_rect().size[0]/2)+15, self.y-int(img.get_rect().size[1]/2)+10))
+        elif self.rank == 9:
+            img = pygame.transform.rotate(pygame.transform.scale(Images["Cannon"], (self.width-10, self.height)), self.angle)
             gameDisplay.blit(img, (self.x-int(img.get_rect().size[0]/2)+15, self.y-int(img.get_rect().size[1]/2)+10))
         else:
             gameDisplay.blit(pygame.transform.rotate(pygame.transform.scale(Images["Flamethrower"], (self.width-5, self.height+10)), self.angle), (self.x, self.y))
@@ -400,15 +421,23 @@ class Tower():
             elif affect[0] == "Unleash Havoc":
                 for i in range(36):
                     self.Projectiles.append(Projectile(self.x+int(self.width/2), self.y+int(self.height/2), i*0.2, self.pierce, self.size, self.bulletSpeed,random.randint(0,1000000), self.rank))
-                
+            elif affect[0] == "Ballistic Nuke" and not affect[2]:
+                for monster in Monsters:
+                    if monster[0].rank <= 6:
+                        monster[0].ReRank(monster[0].rank - 5)
+                    elif 7 <= monster[0].rank <= 9:
+                        monster[0].ReRank(monster[0].rank - 6)
+                    else:
+                        monster[0].ReRank(monster[0].rank - 3)
+                affect[2] = True
                 
             affect[1] -= 1
             if affect[1] <= 0:
                 self.effects.pop(self.effects.index(affect))
                 
-        img = [Images["Dart"], Images["Shruk"], Images["FireBall"]]    
+        img = [Images["Dart"], Images["Shruk"], Images["FireBall"], 0, 0, 0, 0, 0, Images["Cannonball"]]    
         #Checking to see if there is a monster in range
-        if self.rank in [1,2, 3, 8]  and self.cooldown <= 0:
+        if self.rank in [1,2, 3, 8, 9]  and self.cooldown <= 0:
             for monster in Monsters:
                 if math.sqrt((monster[0].x - self.x)**2 + (monster[0].y - self.y)**2) <= self.range and self.cooldown <= 0:
                     if not monster[0].camo or (monster[0].camo and self.camo):
@@ -453,7 +482,7 @@ class Tower():
                         
                         
                         #print("Self: ", (self.x, self.y), " Monster: ", (monster[0].x, monster[0].y), " ", math.atan2((monster[0].y-self.y),(monster[0].x-self.x)), angle)
-                        if self.rank not in [1, 2, 3]:
+                        if self.rank not in [1, 2, 3, 9]:
                             if self.shotAmount == 1:
                                 self.Projectiles.append(Projectile(self.x+int(self.width/2), self.y-int(self.height/2), angle, self.pierce, self.size, self.bulletSpeed,random.randint(0,1000000), self.rank))
                             else:
@@ -565,7 +594,7 @@ class Tower():
                     else:
                         angle = (currentAngle-(6.25/(count+1))) - 3.25
          
-                self.Glaives.append(Glaive((self.x + int(self.width/4), self.y + int(self.height/4)), angle, ring, self.glaiveSpeed, Images["Glaive"]))
+                self.Glaives.append(Glaive((self.x+15, self.y+20), angle, ring, self.glaiveSpeed, Images["Glaive"]))
 
         for glaive in self.Glaives:
             for monster in Monsters:
@@ -589,41 +618,70 @@ class Tower():
         #Updating all the towers projectiles
         for projectile in self.Projectiles:
             projectile.update(speed, gameDisplay)
-            stop = False
             for monster in Monsters:
-                if pygame.sprite.collide_rect(projectile, monster[0]) == True and not stop and projectile.id not in monster[0].hit and ((self.fire and not monster[0].fire[0]) or not self.fire) and (((monster[0].rank == 7) == self.lead) or not monster[0].rank == 7):
-                    self.cash += self.damage
-                
-                    if monster[0].rank >= 6 and monster[0].rank - self.damage < 6:
-                        monster[0].duplicate = True
-                    if monster[0].rank > 7 and monster[0].rank - self.damage <= 7:
-                        modifier = 1
-                    else:
-                        modifier = 0
-                    if self.damage != 0:
-                        if monster[0].health - self.damage <= 0:
-                            monster[0].ReRank(monster[0].rank-self.damage-modifier)
-                        else:
-                            monster[0].health -= self.damage
+                stop = False
+                if projectile.rank != 9:
+                    if pygame.sprite.collide_rect(projectile, monster[0]) == True and not stop and projectile.id not in monster[0].hit and ((self.fire and not monster[0].fire[0]) or not self.fire) and (((monster[0].rank == 7) == self.lead) or not monster[0].rank == 7):
+                        self.cash += self.damage
                     
-                    monster[0].hit.append(projectile.id)
-                    if self.fire:
-                        monster[0].fire = [True, self.fireLength, self.fireLength, self.fireLasting, self.fireDamage]
-                    stop = True
-                    self.pops += self.damage
-                    self.score += self.damage
-                    if self.seeking == True:
-                        for monster in Monsters:
-                            if math.sqrt((monster[0].x - projectile.x)**2 + (monster[0].y - projectile.y)**2) <= self.range*2 and projectile.id not in monster[0].hit:
-                                angle = math.atan2((projectile.y-monster[0].y),(projectile.x-monster[0].x))
-                                projectile.angle = angle
-            if stop:
-                projectile.pierce -= 1
-                if projectile.pierce <= 0:
+                        if monster[0].rank >= 6 and monster[0].rank - self.damage < 6:
+                            monster[0].duplicate = True
+                        if monster[0].rank > 7 and monster[0].rank - self.damage <= 7:
+                            modifier = 1
+                        else:
+                            modifier = 0
+                        if self.damage != 0:
+                            if monster[0].health - self.damage <= 0:
+                                monster[0].ReRank(monster[0].rank-self.damage-modifier)
+                            else:
+                                monster[0].health -= self.damage
+                        
+                        monster[0].hit.append(projectile.id)
+                        if self.fire:
+                            monster[0].fire = [True, self.fireLength, self.fireLength, self.fireLasting, self.fireDamage]
+                        stop = True
+                        self.pops += self.damage
+                        self.score += self.damage
+                        if self.seeking == True:
+                            for monster in Monsters:
+                                if math.sqrt((monster[0].x - projectile.x)**2 + (monster[0].y - projectile.y)**2) <= self.range*2 and projectile.id not in monster[0].hit:
+                                    angle = math.atan2((projectile.y-monster[0].y),(projectile.x-monster[0].x))
+                                    projectile.angle = angle
+                    if stop:
+                        projectile.pierce -= 1
+                        if projectile.pierce <= 0:
+                            if projectile in self.Projectiles:
+                                self.Projectiles.pop(self.Projectiles.index(projectile))
+                    else:
+                        if not 0 <= projectile.x <= 640 or not 0 <= projectile.y <= 480:
+                            if projectile in self.Projectiles:
+                                self.Projectiles.pop(self.Projectiles.index(projectile))
+                else:
+                    if pygame.sprite.collide_rect(projectile, monster[0]) == True:
+                        projectile.exploding = True
+                   
+        
+        for projectile in self.Projectiles:
+            if projectile.rank == 9:
+                if projectile.exploding:
+                    for monster in Monsters:
+                        if math.sqrt((monster[0].x - projectile.x)**2 + (monster[0].y - projectile.y)**2) <= 50:
+                            self.cash += self.damage
+                            if monster[0].rank >= 6 and monster[0].rank - self.damage < 6:
+                                monster[0].duplicate = True
+                            if monster[0].rank > 7 and monster[0].rank - self.damage <= 7:
+                                modifier = 1
+                            else:
+                                modifier = 0
+                            if self.damage != 0:
+                                if monster[0].health - self.damage <= 0:
+                                    monster[0].ReRank(monster[0].rank-self.damage-modifier)
+                                else:
+                                    monster[0].health -= self.damage
+                            self.pops += self.damage
+                            self.score += self.damage
                     self.Projectiles.pop(self.Projectiles.index(projectile))
-            else:
-                if not 0 <= projectile.x <= 640 or not 0 <= projectile.y <= 480:
-                    self.Projectiles.pop(self.Projectiles.index(projectile))
+                        
         return Monsters
 
     def upgrade(self, cash, gameDisplay):
@@ -885,7 +943,33 @@ class Tower():
                                             self.path = 2
                                         else:
                                             self.ability.append(["Unleash Havoc",0, 1000,200])
-            
+
+                                elif self.rank == 9:
+                                    #Cannon Tower
+                                    if i == 0:
+                                        if self.currentUpgrade[i] == 0:
+                                            self.size += 5
+                                        elif self.currentUpgrade[i] == 1:
+                                            self.speed = self.speed * 1.5
+                                        elif self.currentUpgrade[i] == 2:
+                                            self.damage += 2
+                                            self.speed = self.speed * 0.8
+                                            self.path = 1
+                                        else:
+                                            self.camo = True
+                                            self.damage += 2
+                                            
+                                        
+                                    else:
+                                        if self.currentUpgrade[i] == 0:
+                                            self.damage += 1
+                                        elif self.currentUpgrade[i] == 1:
+                                            self.range *= 2
+                                        elif self.currentUpgrade[i] == 2:
+                                            self.shotAmount += 1
+                                            self.path = 2
+                                        else:
+                                            self.ability.append(["Ballistic Nuke",0, 1000,200])
 
                                 
                                 self.currentUpgrade[i] += 1
