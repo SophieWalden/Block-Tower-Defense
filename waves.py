@@ -127,25 +127,24 @@ def genEnemies(wave, Images, mapName):
     else:
         for i in range(random.randint(5,15)):
             n = random.randint(1, 100)
-            if n <= 50-wave:
+            if n <= 40-wave:
                 Monsters.append([monsters.Monster(1, wave, random.randint(1,10)==1, Images, mapName),random.randint(15,30)*(i)])
-            elif n <= 70-wave:
+            elif n <= 50-wave:
                 Monsters.append([monsters.Monster(2, wave, random.randint(1,10)==1, Images, mapName),random.randint(15,30)*(i)])
-            elif n <= 90-wave:
+            elif n <= 65-wave:
                 Monsters.append([monsters.Monster(3, wave, random.randint(1,10)==1, Images, mapName),random.randint(15,30)*(i)])
-            elif n <= 110-wave:
+            elif n <= 75-wave:
                 Monsters.append([monsters.Monster(4, wave, random.randint(1,10)==1, Images, mapName),random.randint(15,30)*(i)])
-            elif n <= 130-wave:
+            elif n <= 85-wave:
                 Monsters.append([monsters.Monster(5, wave, random.randint(1,10)==1, Images, mapName),random.randint(15,30)*(i)])
-            elif n <= 150-wave:
+            elif n <= 100-wave:
                 Monsters.append([monsters.Monster(6, wave, random.randint(1,10)==1, Images, mapName),random.randint(15,30)*(i)])
-            elif n <= 175-wave:
+            elif n <= 125-wave:
                 Monsters.append([monsters.Monster(7, wave, False, Images, mapName),random.randint(15,30)*(i)])
-            elif n <= 200-wave:
+            elif n <= 130-wave:
                 Monsters.append([monsters.Monster(8, wave, random.randint(1,10)==1, Images, mapName),random.randint(15,30)*(i)])
-            elif n <= 225-wave: 
+            elif n <= 175-wave: 
                 Monsters.append([monsters.Monster(9, wave, random.randint(1,10)==1, Images, mapName),random.randint(15,30)*(i)])
-            elif n <= 300-wave:
+            elif n <= 200-wave:
                 Monsters.append([monsters.Monster(10, wave, False, Images, mapName),random.randint(15,30)*i])
-    
     return Monsters
