@@ -6,11 +6,10 @@ pygame.init()
 
 class Monster():
     """Class for all the enemies"""
-    def __init__(self, rank, wave, camo, Images):
+    def __init__(self, rank, wave, camo, Images, mapName):
 
         #Setting up base variables
         self.rank = rank
-        self.x, self.y = -100, 200
         self.step = 0
         speed = [1.5, 2, 2.5, 3, 3.5, 3, 2.5, 1.2, 2, 1.2]
         self.speed = speed[self.rank-1] * (1 + (0.01*(int(wave/50)+1)*wave))
@@ -31,8 +30,14 @@ class Monster():
         elif self.rank == 10:
             self.health = 10
         self.addMonster = []
+        self.map = mapName
         #All checkpoints on the map
-        self.checkpoints = [(6, 5), (6, 2), (3, 2), (3, 9), (13, 9), (13, 4), (17, 4)]
+        if mapName == "Default":
+            self.checkpoints = [(6, 5), (6, 2), (3, 2), (3, 9), (13, 9), (13, 4), (17, 4)]
+            self.x, self.y = -100, 200
+        elif mapName == "Twisty":
+            self.checkpoints = [(14, 9), (1, 9), (1, 1), (11, 1), (11, 6), (4, 6), (4, -1)]
+            self.x, self.y = 560, -100
         self.duplicate = False
         self.cooldown = 0
         self.img = Images
@@ -116,7 +121,7 @@ class Monster():
                 self.checkpoints[self.step][1]*40-self.speed <= self.y <= self.checkpoints[self.step][1]*40+self.speed):
                 self.x, self.y = self.checkpoints[self.step][0]*40, self.checkpoints[self.step][1]*40
                 self.step += 1
-                if self.step == 7:
+                if self.step == len(self.checkpoints):
                     modifier = 1
                     if self.rank == 10:
                         modifier = 4
@@ -133,8 +138,9 @@ class Monster():
                 elif self.y < self.checkpoints[self.step][1]*40:
                     self.y += int(self.speed*speed*self.speedModifier[0])
         else:
+            Checks = {"Default": (-10000, self.y), "Twisty": (self.x, -10000)}
             if self.step == 0:
-                xCheck, yCheck = (-10000, 0)
+                xCheck, yCheck = Checks[self.map]
             else:
                 xCheck, yCheck = self.checkpoints[self.step-1][0]*40, self.checkpoints[self.step-1][1]*40
             if (xCheck-self.speed <= self.x <= xCheck+self.speed and
