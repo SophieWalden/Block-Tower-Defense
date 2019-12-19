@@ -12,7 +12,7 @@ class Monster():
         self.rank = rank
         self.step = 0
         speed = [1.5, 2, 2.5, 3, 3.5, 3, 2.5, 1.2, 2, 1.2]
-        self.speed = speed[self.rank-1] * (1 + (0.01*(int(wave/50)+1)*wave))
+        self.speed = speed[self.rank-1] * (1 + (0.01*(int(wave/150)+1)*wave))
         self.wave = wave
         self.height, self.width = 30, 30
         self.dead = False
