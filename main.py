@@ -366,7 +366,7 @@ def game_loop(load, mapName, Diff=""):
     width, height = 16, 12
 
     Board = setup_Board([[0]*width for _ in range(height)], mapName)
-    Lives, Cash = 100, 750000
+    Lives, Cash = 100, 750
     selection = Selection()
     score = 0
     startButton = Start()
